@@ -63,3 +63,18 @@ To publish your library to [npm](https://www.npmjs.com):
 ```sh
 npm publish
 ```
+
+## Database Migration
+
+To migrate the schema, you need:
+
+```env
+TURSO_DATABASE_URL=xxxx
+TURSO_AUTH_TOKEN=xxxx
+```
+
+Afterward, run the command below to migrate schema to turso
+
+```sh
+npm run generate
+```
