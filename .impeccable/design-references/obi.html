@@ -1,0 +1,1517 @@
+<title>Button Counter — The Obi Band</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light" />
+<meta name="description" content="One button. One number. Every human who presses it increments the same eternal count." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
+  rel="stylesheet"
+/>
+
+<style>
+  /* ============================================================
+     THE OBI BAND — a Tokyo boutique-pop sleeve for Button Counter
+     Two inks on uncoated stock, plus one foil.
+     ============================================================ */
+
+  :root {
+    --cream: #f7f3eb;        /* SLEEVE CREAM  — the bare face */
+    --obi: #e4004f;          /* OBI RED       — the band field */
+    --riso: #ff2a5b;         /* RISOGRAPH RED — misregistration ghost */
+    --ink: #111111;          /* INK BLACK     — all small type on cream */
+    --white: #ffffff;        /* BRIGHT WHITE  — all small type on red */
+    --gray: #d9d7d2;         /* PAPER GRAY    — rules, dead ink */
+    --foil: #8a6220;         /* FOIL BODY     — the count, dark enough to read */
+
+    /* a real underdamped spring (zeta 0.42), sampled into linear() —
+       the release overshoots ~23% and rings down. Press uses a fast
+       ease-out instead: going down should feel instant, not bouncy. */
+    --spring: linear(0 0%, 0.1085 3.1%, 0.3601 6.2%, 0.6546 9.4%, 0.9174 12.5%, 1.1063 15.6%, 1.2085 18.8%, 1.2332 21.9%, 1.2021 25%, 1.1408 28.1%, 1.0721 31.2%, 1.0126 34.4%, 0.971 37.5%, 0.9496 40.6%, 0.9458 43.8%, 0.9543 46.9%, 0.9692 50%, 0.9851 53.1%, 0.9986 56.2%, 1.0077 59.4%, 1.0121 62.5%, 1.0125 65.6%, 1.0103 68.8%, 1.0067 71.9%, 1.003 75%, 1 78.1%, 0.998 81.2%, 0.9971 84.4%, 0.9971 87.5%, 0.9977 90.6%, 0.9985 93.8%, 0.9994 96.9%, 1 100%);
+
+    --rule: 1px;
+    --gut: clamp(1rem, 3.4vw, 2.75rem);
+
+    --display: "Anton", "Haettenschweiler", "Arial Narrow", sans-serif;
+    --text: "Archivo", ui-sans-serif, system-ui, sans-serif;
+    --jp: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--text);
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ---------- MATERIALS -------------------------------------- */
+  /* Uncoated stock: a fine tooth over the whole sheet.           */
+  .stock {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23t)' opacity='0.42'/%3E%3C/svg%3E");
+    background-size: 220px 220px;
+  }
+
+  /* ---------- SCROLL SPINE ----------------------------------- */
+  .scroller {
+    height: 100svh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+  }
+
+  .pane {
+    position: relative;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    min-height: 52svh;
+    padding: var(--gut);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pane:last-child { padding-bottom: calc(var(--gut) * 1.6); }
+
+  .pane--face {
+    min-height: 100svh;
+    padding-bottom: 0;
+    justify-content: center;
+  }
+
+  /* ============================================================
+     THE FACE — bare stock, one geometric mark, the eternal number
+     ============================================================ */
+
+  .spine {
+    position: absolute;
+    top: var(--gut);
+    left: var(--gut);
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    z-index: 4;
+  }
+
+  .logotype {
+    font-family: var(--display);
+    color: var(--obi);
+    font-size: clamp(2.6rem, 5.4vw, 4.6rem);
+    line-height: 0.78;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin: 0;
+    transform: scaleX(0.86);
+    transform-origin: left top;
+  }
+
+  .spine__rule {
+    width: clamp(3rem, 6vw, 5.5rem);
+    border-top: var(--rule) solid var(--obi);
+  }
+
+  .spine__meta {
+    font-size: 0.6rem;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 0.34rem;
+    font-weight: 500;
+  }
+
+  .face {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1.1rem, 2.6vw, 2rem);
+    flex: 1;
+    padding-block: clamp(4.5rem, 12vh, 8rem) 0;
+  }
+
+  /* ---------- the eternal number ------------------------------ */
+  .count {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.02em;
+    font-family: var(--display);
+    font-size: clamp(3.4rem, 15.5vw, 12rem);
+    line-height: 0.84;
+    color: var(--foil);
+    position: relative;
+    isolation: isolate;
+    transform: scaleX(0.9);
+    padding-bottom: 0.14em;
+  }
+
+  /* Each digit gets a fixed cell so a tick never reflows the line. */
+  .digit {
+    display: inline-block;
+    width: 0.58em;
+    text-align: center;
+    position: relative;
+  }
+
+  /* Anton's ink overruns the 0.84 line box by ~0.33em top and bottom. That
+     overflow is what the composited roll layer shears off, and what the foil
+     gradient's background box fails to reach. Pad the box past the ink and
+     pull the padding back out of layout, so neither can clip the glyph. */
+  .digit__v {
+    display: block;
+    padding-block: 0.42em;
+    margin-block: -0.42em;
+    will-change: transform;
+  }
+
+  /* --spring (below) suits the disc: a heavy object with real travel. A
+     digit is a few millimetres of glyph — the same overshoot read as a
+     twitch, not a spring. This is a quieter cousin: a confident deceleration
+     with a settle so small it registers as weight, not bounce. Only digits
+     that actually changed get it; --stagger (set per cell in JS, leftmost
+     changed digit first) makes the roll read left to right across the
+     number, the same direction the eye already scans it.
+
+     The blur is iOS's own numeric-switcher signature: the incoming glyph
+     arrives already moving too fast to resolve, and comes into focus only
+     as it decelerates into place — focus itself becomes the settle, not
+     just position. */
+  .digit.is-rolling {
+    animation: roll 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--stagger, 0ms);
+  }
+
+  @keyframes roll {
+    0%   { transform: translateY(0.22em); opacity: 0; filter: blur(0.07em); }
+    30%  { opacity: 0.55; filter: blur(0.04em); }
+    60%  { opacity: 1; filter: blur(0.02em); }
+    82%  { transform: translateY(-0.015em); filter: blur(0.01em); }
+    91%  { transform: translateY(-0.005em); filter: blur(0.003em); }
+    97%  { transform: translateY(-0.002em); filter: blur(0em); }
+    100% { transform: translateY(0); opacity: 1; filter: blur(0em); }
+  }
+
+  .count__sep { width: 0.22em; }
+
+  .count__label {
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-align: center;
+    font-weight: 600;
+    margin: 1.35rem 0 0;
+  }
+
+  /* ---------- the mark, which is the button -------------------
+     The face stays flat two-ink — no gradient, no bevel — but the depth
+     is a real cast shadow: one shape, one direction, softened. The
+     earlier register-outline-plus-misregistration version read as three
+     misaligned circles rather than as a raised object.
+     ------------------------------------------------------------ */
+  .mark {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    display: block;
+    width: clamp(9.2rem, 25vw, 13.5rem);
+    height: clamp(9.2rem, 25vw, 13.5rem);
+    border-radius: 50%;
+    position: relative;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    /* the caption is absolute, so it owns no layout of its own; reserve
+       its band here or the wrapped band edge covers it at narrow widths */
+    margin-bottom: 3rem;
+    --travel: 0rem;
+    --scale: 1;
+  }
+
+  .mark__disc {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--obi);
+    /* fiber tooth in the ink itself */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23f)' opacity='0.3'/%3E%3C/svg%3E");
+    background-blend-mode: multiply;
+    transform: translateY(var(--travel)) scale(var(--scale));
+    /* contact first, then a shorter ambient cast — a diffuse halo reads
+       as a sticker floating, not as a disc resting on the sheet */
+    box-shadow:
+      0 0.14rem 0.24rem -0.06rem color-mix(in srgb, var(--ink) 40%, transparent),
+      0 0.5rem 0.7rem -0.28rem color-mix(in srgb, var(--ink) 34%, transparent);
+    transition: transform 620ms var(--spring),
+                box-shadow 190ms ease-out;
+  }
+
+  /* hover lifts it off the sheet — the promise that it travels */
+  .mark:hover { --travel: -0.19rem; }
+  .mark:hover .mark__disc {
+    box-shadow:
+      0 0.22rem 0.34rem -0.04rem color-mix(in srgb, var(--ink) 42%, transparent),
+      0 0.85rem 1.05rem -0.15rem color-mix(in srgb, var(--ink) 36%, transparent);
+  }
+
+  /* pressed: it sinks and shrinks a little. The press itself is fast and
+     unsprung — only the release rings out. */
+  .mark:active { --travel: 0.3rem; --scale: 0.990; }
+  .mark:active .mark__disc {
+    transition: transform 90ms cubic-bezier(0.3, 0.7, 0.4, 1),
+                box-shadow 90ms ease-out;
+  }
+  .mark:active .mark__disc {
+    box-shadow:
+      0 0.05rem 0.1rem -0.02rem color-mix(in srgb, var(--ink) 44%, transparent),
+      0 0.1rem 0.18rem -0.08rem color-mix(in srgb, var(--ink) 30%, transparent);
+  }
+
+  .mark:focus-visible { outline: none; }
+  .mark:focus-visible .mark__disc {
+    outline: 2px solid var(--ink);
+    outline-offset: 6px;
+  }
+
+  .mark__caption {
+    position: absolute;
+    top: calc(100% + 1.15rem);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ============================================================
+     THE OBI BAND — the wrapped, printed, textured band
+     ============================================================ */
+
+  .obi {
+    position: relative;
+    background: var(--obi);
+    color: var(--white);
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  /* The band is woven, not printed. Every texture layer lives inside
+     .obi__content because that is the only subtree Cloth rasterizes —
+     anything on .obi itself would vanish the moment the cloth shader
+     takes over, and the two paths would disagree. */
+  .obi__weave {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    /* The band's red lives here, not only on .obi: this element is the
+       isolated group the thread layers blend against, and multiply and
+       screen both need the dye under them to have anything to act on. */
+    background-color: var(--obi);
+    /* the selvedge: a denser, finished edge along the band's long sides */
+    background-image:
+      linear-gradient(180deg,
+        rgba(0,0,0,0.22) 0 1.5px,
+        rgba(255,255,255,0.09) 1.5px 3px,
+        rgba(0,0,0,0.09) 3px 5px,
+        transparent 5px 12px),
+      linear-gradient(0deg,
+        rgba(0,0,0,0.19) 0 1.5px,
+        rgba(255,255,255,0.07) 1.5px 3px,
+        rgba(0,0,0,0.08) 3px 5px,
+        transparent 5px 12px);
+    background-repeat: no-repeat, no-repeat;
+    background-size: 100% 12px, 100% 12px;
+    background-position: top, bottom;
+    /* the wrap: the band folds away from the sheet at head and foot */
+    box-shadow:
+      inset 0 9px 15px -10px rgba(0,0,0,0.34),
+      inset 0 -9px 15px -10px rgba(0,0,0,0.28);
+  }
+
+  /* Layer 1 — the shadowed side of the weave. The periodic gradients
+     carry the thread rhythm but stay quiet; two anisotropic noise fields
+     do the real work, one streaked along the weft and one along the warp,
+     so the crossings never lock into a legible checkerboard the way a
+     printed screen would. A shallow twill breaks the last of the grid. */
+  .obi__weave::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: multiply;
+    opacity: 0.7;
+    background-image:
+      repeating-linear-gradient(0deg,
+        rgba(0,0,0,0.13) 0 1px,
+        rgba(0,0,0,0.04) 1px 2.1px,
+        rgba(0,0,0,0) 2.1px 4.2px),
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0.06) 0 1px,
+        rgba(0,0,0,0) 1px 3.1px),
+      repeating-linear-gradient(64deg,
+        rgba(0,0,0,0.05) 0 1px,
+        rgba(0,0,0,0) 1px 7px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='weft'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.85' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.6'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23weft)'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='warp'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8 0.016' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.34'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23warp)'/%3E%3C/svg%3E");
+    background-size: auto, auto, auto, 340px 340px, 340px 340px;
+  }
+
+  /* Layer 2 — the lit crown of each weft thread, half a period off the
+     shadow, and the broad sheen silk throws across the weave. Kept low:
+     the white credits have only ~4.8:1 on this red to spend. */
+  .obi__weave::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    mix-blend-mode: screen;
+    opacity: 0.19;
+    background-image:
+      repeating-linear-gradient(0deg,
+        rgba(255,255,255,0) 0 2.2px,
+        rgba(255,255,255,0.20) 2.2px 2.9px,
+        rgba(255,255,255,0) 2.9px 4.2px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='fuzz'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014 0.7' numOctaves='3' seed='19' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='gamma' amplitude='0.5' exponent='1.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23fuzz)'/%3E%3C/svg%3E"),
+      linear-gradient(97deg,
+        transparent 0 16%,
+        rgba(255,238,200,0.26) 36%,
+        rgba(255,250,232,0.34) 46%,
+        rgba(255,238,200,0.22) 57%,
+        transparent 78%);
+    background-size: auto, 340px 340px, 190% 100%;
+    background-position: 0 0, 0 0, 28% 0;
+    background-repeat: repeat, repeat, no-repeat;
+  }
+
+  /* Absolute, not height:100% — as a flex-stretched child the band's
+     height is not a definite containing block, so the percentage came up
+     short and left the foot of the band unwoven. Absolute fills both the
+     band and the Cloth source canvas, which have the same box. */
+  .obi__content {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    overflow: hidden;
+  }
+
+  .obi__src { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; }
+  .obi__src[hidden] { display: none; }
+  .obi__out {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  /* ---------- the band's printed credits ---------------------- */
+  .credits {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: clamp(0.9rem, 2.4vw, 2rem);
+    padding: clamp(0.9rem, 2.2vw, 1.7rem) var(--gut);
+    overflow: hidden;
+  }
+
+  .credits__block {
+    flex: 0 1 auto;
+    max-width: 38%;
+    padding-right: clamp(0.6rem, 2vw, 1.6rem);
+  }
+
+  .credits__mark {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 4.2rem);
+    line-height: 0.78;
+    text-transform: uppercase;
+    color: var(--white);
+    transform: scaleX(0.86);
+    transform-origin: left top;
+    margin: 0;
+    flex: none;
+  }
+
+  .credits__sub {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
+
+  /* vertical Japanese credit columns, right-to-left */
+  .vcols {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: clamp(0.55rem, 1.5vw, 1.15rem);
+    overflow: hidden;
+    flex: 1;
+    justify-content: space-between;
+    align-items: stretch;
+  }
+
+  .vcol {
+    writing-mode: vertical-rl;
+    font-family: var(--jp);
+    font-size: clamp(0.6rem, 1.15vw, 0.78rem);
+    letter-spacing: 0.14em;
+    line-height: 1.5;
+    color: var(--white);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .vcol--thin { font-weight: 400; opacity: 0.92; }
+
+  /* columns hang alternately from the head and the foot of the band */
+  .vcol:nth-child(even) { align-self: flex-end; }
+  .vcol:nth-child(3n) { align-self: center; }
+
+  .vcol--num {
+    font-family: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.1em;
+  }
+
+  .credits__stack {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    text-align: right;
+    flex: none;
+    gap: 0.5rem;
+  }
+
+  .catalog {
+    font-family: var(--display);
+    font-size: clamp(1.15rem, 2.6vw, 2rem);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    transform: scaleX(0.9);
+    transform-origin: right top;
+  }
+
+  .chip {
+    display: inline-block;
+    border: var(--rule) solid var(--white);
+    padding: 0.16rem 0.42rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .micro {
+    font-size: 0.55rem;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .barcode {
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    height: 2.2rem;
+  }
+
+  .barcode i { display: block; width: 1px; background: var(--white); height: 100%; }
+  .barcode i.w { width: 2px; }
+  .barcode i.h { height: 78%; }
+
+  /* the hero band: the wrapped edge peeking past the face */
+  .band--edge {
+    height: clamp(6.2rem, 13svh, 9rem);
+    flex: none;
+    margin-inline: calc(var(--gut) * -1);
+  }
+
+  .band--edge .credits { align-items: center; padding-block: 0.7rem; }
+  .band--edge .credits__mark { font-size: clamp(1.35rem, 2.9vw, 2.3rem); }
+  .band--edge .vcol { font-size: clamp(0.52rem, 0.95vw, 0.66rem); letter-spacing: 0.11em; }
+  /* row-reverse: flex-end is the left edge */
+  .band--edge .vcols { justify-content: flex-end; gap: clamp(0.7rem, 2.2vw, 1.9rem); }
+
+  .band--full {
+    flex: 1;
+    margin-inline: calc(var(--gut) * -1);
+    margin-bottom: calc(var(--gut) * -1);
+  }
+
+  /* ============================================================
+     THE RECORD — history printed as a struck column field
+     ============================================================ */
+
+  .pane__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    border-bottom: var(--rule) solid var(--obi);
+    padding-bottom: 0.55rem;
+    margin-bottom: clamp(0.9rem, 2.4vw, 1.6rem);
+    flex: none;
+  }
+
+  .pane__title {
+    font-family: var(--display);
+    font-size: clamp(1.15rem, 2.7vw, 1.9rem);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--obi);
+    margin: 0;
+    transform: scaleX(0.9);
+    transform-origin: left center;
+  }
+
+  .pane__note {
+    font-size: 0.6rem;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: right;
+  }
+
+  .record { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+  .record__plot {
+    flex: 1 1 auto;
+    height: clamp(7rem, 26svh, 20rem);
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(1px, 0.5vw, 4px);
+    min-height: 0;
+    border-bottom: var(--rule) solid var(--ink);
+    padding-bottom: 2px;
+  }
+
+  .bar {
+    flex: 1;
+    background: var(--obi);
+    min-height: 2px;
+    position: relative;
+    transform-origin: bottom;
+  }
+
+  .bar::after {
+    /* the misregistered second pass, again */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--riso);
+    mix-blend-mode: multiply;
+    opacity: 0.28;
+    transform: translate(1.4px, 0);
+  }
+
+  .bar--live { background: var(--foil); }
+
+  .record__axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ============================================================
+     YOUR PRESSES — the overprint pane
+     ============================================================ */
+
+  .overprint {
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: clamp(0.9rem, 2.4vw, 1.7rem);
+    min-height: 0;
+  }
+
+  .overprint__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .yours {
+    font-family: var(--display);
+    font-size: clamp(4rem, 13.5vw, 10.5rem);
+    line-height: 0.82;
+    color: var(--obi);
+    margin: 0;
+    transform: scaleX(0.9);
+    transform-origin: left center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .yours__label {
+    font-size: 0.62rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 0.7rem 0 0;
+  }
+
+  /* your share of the whole, as a halftone field */
+  .share {
+    position: relative;
+    height: 100%;
+    min-height: clamp(5rem, 18svh, 12rem);
+    width: 100%;
+    border: var(--rule) solid var(--ink);
+    overflow: hidden;
+    background: var(--cream);
+  }
+
+  .share__field {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-radial-gradient(
+      circle at 1.7px 1.7px,
+      var(--obi) 0 1.05px,
+      transparent 1.05px 3.4px
+    );
+    background-size: 3.4px 3.4px;
+    opacity: 0.9;
+  }
+
+  .share__mine {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    min-width: 2px;
+    background: var(--foil);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--foil) 45%, transparent);
+  }
+
+  .share__tag {
+    position: absolute;
+    top: 0.45rem;
+    left: 0.45rem;
+    background: var(--foil);
+    color: var(--cream);
+    font-size: 0.55rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 0.16rem 0.4rem;
+    white-space: nowrap;
+  }
+
+  .share__scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.42rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .share__ticks {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 0.5rem;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--ink) 0 1px,
+      transparent 1px 5%
+    );
+    opacity: 0.55;
+  }
+
+  .share__cap {
+    position: absolute;
+    left: 0.5rem;
+    bottom: 0.4rem;
+    font-size: 0.55rem;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--cream) 88%, transparent);
+    padding: 0.1rem 0.3rem;
+  }
+
+  /* ============================================================
+     COLOPHON
+     ============================================================ */
+
+  .colophon { flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; min-height: 0; }
+
+  .colophon__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: clamp(0.8rem, 2.2vw, 1.8rem);
+  }
+
+  .colophon dl { margin: 0; }
+  .colophon dt {
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--obi);
+    border-bottom: var(--rule) solid var(--gray);
+    padding-bottom: 0.28rem;
+    margin-bottom: 0.4rem;
+  }
+  .colophon dd {
+    margin: 0 0 0.32rem;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .synthetic {
+    border: 2px solid var(--obi);
+    padding: 0.7rem 0.85rem;
+    font-size: 0.68rem;
+    line-height: 1.4;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .synthetic b {
+    display: block;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--obi);
+    margin-bottom: 0.3rem;
+  }
+
+  .barcode--ink i { background: var(--ink); }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+
+  @media (max-width: 46rem) {
+    .spine { position: static; margin-bottom: 0; }
+    .logotype { font-size: clamp(2.2rem, 12vw, 3.4rem); }
+    .face { padding-block: clamp(1.5rem, 6vh, 3rem) 0; gap: clamp(2.2rem, 7vh, 4rem); }
+    .credits__stack { display: none; }
+    .credits__block { max-width: 46%; }
+    .vcol--en { display: none; }
+    .band--full .credits__mark { font-size: clamp(1.35rem, 7vw, 2rem); }
+    .band--full .credits__sub { font-size: 0.5rem; }
+    .overprint { grid-template-columns: minmax(0, 1fr); align-content: center; }
+    .pane { min-height: 56svh; }
+    /* .pane wins the min-height tie by source order alone (same specificity
+       as .pane--face's own rule) — restate it here or the hero pane
+       collapses to 56svh and the next section's band peeks in under the
+       edge band, reading as two footers stacked on first view. */
+    .pane--face { min-height: 100svh; }
+    .band--edge { height: clamp(5.4rem, 12svh, 7rem); }
+    .pane--band { min-height: 42svh; }
+    .vcols { gap: 0.5rem; }
+  }
+
+  @media (max-width: 30rem) {
+    .credits { padding-inline: calc(var(--gut) * 0.8); }
+  }
+
+  /* ============================================================
+     REDUCED MOTION — every motion here is decoration, not meaning
+     ============================================================ */
+
+  @media (prefers-reduced-motion: reduce) {
+    .scroller { scroll-behavior: auto; }
+    .digit.is-rolling { animation: none; }
+    .mark, .mark__disc { transition: none; }
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+
+<!--
+THESIS: One number for the whole species, printed on a bare sleeve and wrapped
+in a paper obi band. It refuses the category default: a glowing counter centred
+on a dark ground with a pill button under it.
+OWN-WORLD: Two inks on uncoated stock — obi red #E4004F on sleeve cream #F7F3EB —
+plus one gold foil for the count alone. Heavy condensed display, dense vertical
+Japanese credit columns, hairline rules, halftone misregistration, barcode.
+STORY: The visitor sees a number, presses the one mark on the face, and watches
+the number keep moving without them. Scrolling unwraps the band.
+FIRST VIEWPORT: Bare cream face. The eternal count in foil at display scale,
+centred. Below it the geometric mark, which is the button. The red band's top
+edge crosses the bottom, crowded with credits, half-wrapped.
+FORM: The Obi Band — dealt challenger, chosen over the assigned direction; seed
+key 6b80b79e, round 4, mode experience.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->
+
+<div class="stock" aria-hidden="true"></div>
+
+<main class="scroller" id="scroller">
+
+  <!-- ========== THE FACE ========== -->
+  <section class="pane pane--face" aria-labelledby="count-label">
+    <div class="spine">
+      <h1 class="logotype">Button<br />Counter</h1>
+      <div class="spine__rule"></div>
+      <div class="spine__meta">
+        <span>BC-001</span>
+      </div>
+    </div>
+
+    <div class="face">
+      <div>
+        <div class="count" id="count" aria-hidden="true"></div>
+        <p class="count__label" id="count-label">Presses, all of humanity, since 24 · 04 · 24</p>
+        <p class="sr" id="live" role="status" aria-live="polite"></p>
+      </div>
+
+      <button class="mark" id="mark" type="button">
+        <span class="mark__disc" aria-hidden="true"></span>
+        <span class="mark__caption">Press</span>
+        <span class="sr">Add one to the count</span>
+      </button>
+    </div>
+
+    <!-- the band's wrapped edge, peeking -->
+    <div class="obi band--edge" data-cloth data-pin="left">
+      <canvas class="obi__src" hidden aria-hidden="true" layoutsubtree="true"></canvas>
+      <div class="obi__content">
+        <span class="obi__weave" aria-hidden="true"></span>
+        <div class="credits">
+          <div class="credits__block">
+            <p class="credits__mark">Button<br />Counter</p>
+          </div>
+          <div class="vcols" aria-hidden="true">
+            <span class="vcol">ボタン・カウンター</span>
+            <span class="vcol vcol--thin">一つの数字</span>
+            <span class="vcol vcol--num" id="edge-total">—</span>
+            <span class="vcol vcol--thin">合成データ</span>
+            <span class="vcol vcol--thin vcol--en">SYNTHETIC</span>
+            <span class="vcol vcol--thin">押すだけ</span>
+            <span class="vcol vcol--thin vcol--en">+1 ONLY</span>
+            <span class="vcol vcol--thin">戻らない</span>
+            <span class="vcol vcol--thin vcol--en">NEVER DOWN</span>
+            <span class="vcol vcol--thin">BC-001</span>
+          </div>
+        </div>
+      </div>
+      <canvas class="obi__out" aria-hidden="true"></canvas>
+    </div>
+  </section>
+
+  <!-- ========== THE BAND, UNWRAPPED ========== -->
+  <section class="pane pane--band" aria-label="The band">
+    <div class="obi band--full" data-cloth data-pin="left">
+      <canvas class="obi__src" hidden aria-hidden="true" layoutsubtree="true"></canvas>
+      <div class="obi__content">
+        <span class="obi__weave" aria-hidden="true"></span>
+        <div class="credits">
+          <div class="credits__block">
+            <p class="credits__mark">Button<br />Counter</p>
+            <p class="credits__sub">One number for the whole species</p>
+          </div>
+
+          <div class="vcols">
+            <span class="vcol" aria-hidden="true">総押下数・ぜんじんるい</span>
+            <span class="vcol vcol--num" id="band-total">—</span>
+            <span class="vcol vcol--thin" aria-hidden="true">数字は減らない、戻らない</span>
+            <span class="vcol vcol--thin vcol--en">NEVER RESETS · NEVER DECREASES</span>
+            <span class="vcol vcol--num">+<span id="band-rate">—</span> PRESSES / MIN</span>
+            <span class="vcol vcol--thin" aria-hidden="true">初回押下 二〇二四年四月二四日</span>
+            <span class="vcol vcol--thin vcol--en">FIRST PRESS 2024 · 04 · 24</span>
+            <span class="vcol vcol--thin" aria-hidden="true">チーム無し・地域無し・目標無し</span>
+            <span class="vcol vcol--thin vcol--en">NO TEAMS · NO REGIONS · NO GOAL</span>
+            <span class="vcol vcol--num" id="band-months">—</span>
+            <span class="vcol vcol--thin" aria-hidden="true">合成データ・SYNTHETIC DATA</span>
+            <span class="vcol vcol--thin vcol--en">ALL FIGURES SYNTHETIC</span>
+            <span class="vcol vcol--thin" aria-hidden="true">押すことだけができる</span>
+            <span class="vcol vcol--thin vcol--en">THE ONLY ACTION IS +1</span>
+          </div>
+
+          <div class="credits__stack">
+            <span class="catalog">BC-001</span>
+            <span class="chip">Synthetic</span>
+            <span class="micro">Since 24 · 04 · 24</span>
+            <div class="barcode" id="barcode" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+      <canvas class="obi__out" aria-hidden="true"></canvas>
+    </div>
+  </section>
+
+  <!-- ========== THE RECORD ========== -->
+  <section class="pane" aria-labelledby="rec-title">
+    <div class="pane__head">
+      <h2 class="pane__title" id="rec-title">The record</h2>
+      <p class="pane__note">Presses per month · <span id="rec-span">—</span><br />Synthetic</p>
+    </div>
+    <div class="record">
+      <div class="record__plot" id="plot" role="img" aria-label="Monthly presses, rising month over month. Synthetic demonstration data."></div>
+      <div class="record__axis">
+        <span id="axis-from">—</span>
+        <span id="axis-mid">—</span>
+        <span id="axis-to">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== YOUR PRESSES ========== -->
+  <section class="pane" aria-labelledby="you-title">
+    <div class="pane__head">
+      <h2 class="pane__title" id="you-title">Yours</h2>
+      <p class="pane__note">This browser only<br />Not an account</p>
+    </div>
+    <div class="overprint">
+      <div class="overprint__head">
+        <div>
+          <p class="yours" id="mine">0</p>
+          <p class="yours__label">Presses you have added</p>
+        </div>
+        <p class="pane__note" id="share-ratio">—</p>
+      </div>
+      <div>
+        <div class="share">
+          <span class="share__field" aria-hidden="true"></span>
+          <span class="share__mine" id="share-mine" aria-hidden="true"></span>
+          <span class="share__ticks" aria-hidden="true"></span>
+          <span class="share__tag" id="share-tag">You</span>
+          <span class="share__cap" id="share-cap">—</span>
+        </div>
+        <div class="share__scale" aria-hidden="true">
+          <span>0</span>
+          <span>Every press ever made, left to right</span>
+          <span id="scale-max">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== COLOPHON ========== -->
+  <section class="pane" aria-labelledby="col-title">
+    <div class="pane__head">
+      <h2 class="pane__title" id="col-title">Colophon</h2>
+      <p class="pane__note">BC-001<br />Design mockup</p>
+    </div>
+    <div class="colophon">
+      <div class="colophon__grid">
+        <dl>
+          <dt>Catalog</dt>
+          <dd>BC-001</dd>
+          <dd>Button Counter</dd>
+          <dd>Single global counter</dd>
+        </dl>
+        <dl>
+          <dt>Format</dt>
+          <dd>Standalone HTML</dd>
+          <dd>Visual contract, not the wired app</dd>
+          <dd>SvelteKit · socket.io · Turso</dd>
+        </dl>
+        <dl>
+          <dt>Materials</dt>
+          <dd>Obi red #E4004F</dd>
+          <dd>Sleeve cream #F7F3EB</dd>
+          <dd>One gold foil, count only</dd>
+        </dl>
+        <dl>
+          <dt>Band</dt>
+          <dd>Canvas UI · Cloth</dd>
+          <dd id="cloth-state">—</dd>
+          <dd>Paper texture is CSS, always on</dd>
+        </dl>
+      </div>
+
+      <div class="synthetic">
+        <b>Every figure on this page is synthetic</b>
+        The eternal count, the monthly record, the press rate, the first-press
+        date and your own press total are authored demonstration data generated
+        in this browser. Nothing here has been measured. There is no deployment,
+        no traffic and no real counter behind this page yet.
+      </div>
+
+      <div class="barcode barcode--ink" id="barcode2" aria-hidden="true"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* Canvas UI — Cloth (vanilla), bundled from @canvas-ui/cloth-vanilla.
+   createRectCache is a local shim: it is imported by the published source
+   but is not itself published as a registry item. */
+</script>
+<script>
+var ClothUI=(()=>{var Fe=Object.defineProperty;var it=Object.getOwnPropertyDescriptor;var ct=Object.getOwnPropertyNames;var st=Object.prototype.hasOwnProperty;var lt=(E,g)=>{for(var a in g)Fe(E,a,{get:g[a],enumerable:!0})},ut=(E,g,a,R)=>{if(g&&typeof g=="object"||typeof g=="function")for(let F of ct(g))!st.call(E,F)&&F!==a&&Fe(E,F,{get:()=>g[F],enumerable:!(R=it(g,F))||R.enumerable});return E};var ft=E=>ut(Fe({},"__esModule",{value:!0}),E);var gt={};lt(gt,{createCloth:()=>Qe,supportsHtmlInCanvas:()=>je});function qe(E){let g=E.getBoundingClientRect(),a=()=>{g=E.getBoundingClientRect()},R=typeof ResizeObserver<"u"?new ResizeObserver(a):null;return R?.observe(E),window.addEventListener("scroll",a,{passive:!0,capture:!0}),window.addEventListener("resize",a,{passive:!0}),{get current(){return g},update:a,destroy(){R?.disconnect(),window.removeEventListener("scroll",a,!0),window.removeEventListener("resize",a)}}}var mt={pin:"top",wind:3,speed:.5,amplitude:30,drape:40,brush:2.05,brushSize:150,damping:1,light:.5,sheen:.1,shadow:.25,cornerRadius:20,backing:"auto",perspective:1200},ht=`#version 300 es
+precision highp float;
+layout(location = 0) in vec2 aGrid;
+layout(location = 1) in vec4 aData;
+layout(location = 2) in vec2 aOffset;
+uniform vec2 uRes;
+uniform vec2 uOut;
+uniform float uBleed;
+uniform float uFocal;
+out vec2 vUv;
+out vec3 vNormal;
+out float vFold;
+out vec2 vLocal;
+
+void main () {
+  vUv = aGrid;
+  float z = aData.x;
+  vec2 nxy = aData.yz;
+  vNormal = vec3(nxy, sqrt(max(1.0 - dot(nxy, nxy), 0.04)));
+  vFold = aData.w;
+
+  vLocal = aGrid * uRes;
+  vec2 px = vLocal + aOffset + vec2(uBleed);
+  vec2 ndc = (px / uOut) * 2.0 - 1.0;
+  ndc.y = -ndc.y;
+  float w = (uFocal - z) / uFocal;
+  gl_Position = vec4(ndc, -z / uFocal, w);
+}`,$e=`
+float fabricDist (vec2 p, vec2 size, float radius) {
+  vec2 half_ = size * 0.5;
+  float r = min(radius, min(half_.x, half_.y));
+  vec2 q = abs(p - half_) - (half_ - vec2(r));
+  return length(max(q, vec2(0.0))) + min(max(q.x, q.y), 0.0) - r;
+}`,dt=`#version 300 es
+precision highp float;
+in vec2 vUv;
+in vec3 vNormal;
+in float vFold;
+in vec2 vLocal;
+out vec4 outColor;
+uniform sampler2D uContent;
+uniform float uMaxX;
+uniform float uLight;
+uniform float uSheen;
+uniform vec3 uBacking;
+uniform vec2 uRes;
+uniform float uRadius;
+uniform float uDark;
+${$e}
+
+void main () {
+  vec2 uv = clamp(vUv, vec2(0.001), vec2(uMaxX - 0.001, 0.999));
+  vec4 tex = texture(uContent, uv);
+  vec3 fabric = mix(uBacking, tex.rgb, tex.a);
+
+  vec3 n = normalize(vNormal);
+  vec3 lightDir = normalize(vec3(-0.3, 0.42, 0.86));
+  float diffFlat = 0.58 + 0.42 * lightDir.z;
+  float diff = 0.58 + 0.42 * dot(n, lightDir);
+  float shade = mix(1.0, (diff / diffFlat) * vFold, uLight);
+  vec3 lit = fabric * shade;
+
+  vec3 halfway = normalize(lightDir + vec3(0.0, 0.0, 1.0));
+  float specFlat = pow(halfway.z, 34.0);
+  float spec =
+    max(pow(max(dot(n, halfway), 0.0), 34.0) - specFlat, 0.0) /
+    (1.0 - specFlat);
+  lit += uSheen * spec * mix(vec3(1.0), fabric, 0.35);
+
+  float broadFlat = pow(halfway.z, 6.0);
+  float broad =
+    max(pow(max(dot(n, halfway), 0.0), 6.0) - broadFlat, 0.0) /
+    (1.0 - broadFlat);
+  lit += uDark * uLight * 0.3 * broad * vec3(1.0);
+
+  float d = fabricDist(vLocal, uRes, uRadius);
+
+  float hemT = smoothstep(0.0, 6.0, -d);
+  lit *= mix(1.0, mix(0.93, 1.0, hemT), uLight * (1.0 - uDark));
+  lit += vec3(uDark * uLight * 0.08 * (1.0 - hemT));
+
+  float alpha = clamp(0.5 - d, 0.0, 1.0);
+  outColor = vec4(clamp(lit, 0.0, 1.0), 1.0) * alpha;
+}`,vt=`#version 300 es
+precision highp float;
+layout(location = 0) in vec2 aGrid;
+layout(location = 1) in vec4 aData;
+layout(location = 2) in vec2 aOffset;
+uniform vec2 uRes;
+uniform vec2 uOut;
+uniform float uBleed;
+out vec2 vLocal;
+out float vLift;
+
+void main () {
+  float z = aData.x;
+  vLift = z;
+  vLocal = aGrid * uRes;
+  vec2 px =
+    vLocal + aOffset + vec2(uBleed) + vec2(10.0, 14.0) + vec2(0.3, 0.42) * z;
+  vec2 ndc = (px / uOut) * 2.0 - 1.0;
+  ndc.y = -ndc.y;
+  gl_Position = vec4(ndc, 0.0, 1.0);
+}`,pt=`#version 300 es
+precision highp float;
+in vec2 vLocal;
+in float vLift;
+out vec4 outColor;
+uniform float uShadow;
+uniform vec2 uRes;
+uniform float uRadius;
+uniform float uDark;
+${$e}
+
+void main () {
+  float d = fabricDist(vLocal, uRes, uRadius);
+  float a = uShadow * smoothstep(0.0, 30.0, -d);
+
+  a *= mix(1.0, 0.55, clamp(vLift / 50.0, 0.0, 1.0));
+
+  a *= mix(1.0, 0.55, uDark);
+  vec3 tint = vec3(uDark);
+  outColor = vec4(tint * a, a);
+}`,s=96,o=s+1,ue=1/120,fe=30,bt=.55,xt=5,k=48;function je(){if(typeof document>"u")return!1;let E=document.createElement("canvas"),g=E.getContext("2d");return!!(g&&typeof g.drawElementImage=="function"&&typeof E.requestPaint=="function")}function Qe(E,g={}){let a={...mt,...g},{source:R,content:F,output:v}=E,z=v.parentElement??v;v.style.top=`${-k}px`,v.style.left=`${-k}px`,v.style.right=`${-k}px`,v.style.bottom=`${-k}px`,v.style.width=`calc(100% + ${k*2}px)`,v.style.height=`calc(100% + ${k*2}px)`;let e=v.getContext("webgl2",{alpha:!0,depth:!1,stencil:!1,antialias:!0,premultipliedAlpha:!0});if(!e||e.isContextLost())return null;let X=R.getContext("2d"),Q=R,H=!!(X&&typeof X.drawElementImage=="function"&&typeof Q.requestPaint=="function"),Ce=()=>{},De=()=>{};H&&(Q.onpaint=()=>De());function Le(t,n){let r=e.createShader(t);return e.shaderSource(r,n),e.compileShader(r),e.getShaderParameter(r,e.COMPILE_STATUS)||console.error("Cloth shader error:",e.getShaderInfoLog(r)),r}function _e(t,n){let r=Le(e.VERTEX_SHADER,t),c=Le(e.FRAGMENT_SHADER,n),i=e.createProgram();e.attachShader(i,r),e.attachShader(i,c),e.linkProgram(i);let h={},b=e.getProgramParameter(i,e.ACTIVE_UNIFORMS);for(let f=0;f<b;f++){let l=e.getActiveUniform(i,f);h[l.name]=e.getUniformLocation(i,l.name)}return{program:i,vert:r,frag:c,uniforms:h}}let M=_e(ht,dt),C=_e(vt,pt),me=new Float32Array(o*o*2);for(let t=0;t<o;t++)for(let n=0;n<o;n++){let r=(t*o+n)*2;me[r]=n/s,me[r+1]=t/s}let S=new Uint32Array(s*s*6),G=0;for(let t=0;t<s;t++)for(let n=0;n<s;n++){let r=t*o+n,c=r+1,i=r+o,h=i+1;S[G++]=r,S[G++]=i,S[G++]=c,S[G++]=c,S[G++]=i,S[G++]=h}let he=e.createVertexArray();e.bindVertexArray(he);let Be=e.createBuffer();e.bindBuffer(e.ARRAY_BUFFER,Be),e.bufferData(e.ARRAY_BUFFER,me,e.STATIC_DRAW),e.enableVertexAttribArray(0),e.vertexAttribPointer(0,2,e.FLOAT,!1,0,0);let de=e.createBuffer();e.bindBuffer(e.ARRAY_BUFFER,de),e.bufferData(e.ARRAY_BUFFER,o*o*4*4,e.DYNAMIC_DRAW),e.enableVertexAttribArray(1),e.vertexAttribPointer(1,4,e.FLOAT,!1,0,0);let ve=e.createBuffer();e.bindBuffer(e.ARRAY_BUFFER,ve),e.bufferData(e.ARRAY_BUFFER,o*o*2*4,e.DYNAMIC_DRAW),e.enableVertexAttribArray(2),e.vertexAttribPointer(2,2,e.FLOAT,!1,0,0);let Se=e.createBuffer();e.bindBuffer(e.ELEMENT_ARRAY_BUFFER,Se),e.bufferData(e.ELEMENT_ARRAY_BUFFER,S,e.STATIC_DRAW),e.bindVertexArray(null);let J=e.createTexture();e.bindTexture(e.TEXTURE_2D,J),e.texParameteri(e.TEXTURE_2D,e.TEXTURE_MIN_FILTER,e.LINEAR),e.texParameteri(e.TEXTURE_2D,e.TEXTURE_MAG_FILTER,e.LINEAR),e.texParameteri(e.TEXTURE_2D,e.TEXTURE_WRAP_S,e.CLAMP_TO_EDGE),e.texParameteri(e.TEXTURE_2D,e.TEXTURE_WRAP_T,e.CLAMP_TO_EDGE),e.texImage2D(e.TEXTURE_2D,0,e.RGBA,1,1,0,e.RGBA,e.UNSIGNED_BYTE,new Uint8Array([0,0,0,0]));let Ie=1;De=()=>{if(H)try{X.reset(),X.drawElementImage(F,0,0),e.bindTexture(e.TEXTURE_2D,J),e.texImage2D(e.TEXTURE_2D,0,e.RGBA,e.RGBA,e.UNSIGNED_BYTE,R),X.reset(),Ce()}catch{}};function pe(){let t=Math.min(window.devicePixelRatio||1,2),n=Math.max(1,Math.round(v.clientWidth*t)),r=Math.max(1,Math.round(v.clientHeight*t));if((v.width!==n||v.height!==r)&&(v.width=n,v.height=r),Ie=Math.min(1,Math.max(.05,F.clientWidth/Math.max(z.clientWidth,1))),H){let c=Math.max(1,Math.round(R.clientWidth)),i=Math.max(1,Math.round(R.clientHeight));(R.width!==c*t||R.height!==i*t)&&(R.width=c*t,R.height=i*t),Q.requestPaint()}}let D=new Float32Array(o*o),V=new Float32Array(o*o),K=new Float32Array(o*o),Y=new Float32Array(o*o*4),Z=new Float32Array(o*o*2),y=new Float32Array(o*o),Ue=new Float32Array(o),Oe=new Float32Array(o),be=new Float32Array(o);for(let t=0;t<o;t++)be[t]=Math.pow(t/s,1.3);let xe=Math.random()*60,ee=.5,Pe=1,N={x:-1e5,y:-1e5,inside:!1},m={x:-1e5,y:-1e5,vx:0,vy:0,s:0};function Ne(t,n){return a.pin==="top"?[n,t]:a.pin==="bottom"?[s-n,t]:a.pin==="left"?[t,n]:[s-t,n]}function Je(t){let n=Math.max(a.speed,0);xe+=t*n;let r=xe,c=xt*Math.max(a.wind,0)*ee,i=Math.PI*2/(s/1.5),h=Math.PI*2/(s/3.8),b=Math.PI*2/(s/2.2),f=fe*i,l=fe*h,p=1.8*Math.sin(.23*r);for(let u=0;u<o;u++)Ue[u]=Math.sin(i*u-f*r+p)+.45*Math.sin(h*u+l*r*.8+3);for(let u=0;u<o;u++)Oe[u]=(.7+.3*Math.sin(b*u-1.7*r))*be[u];let x=fe*fe,d=t*t,U=Math.exp(-Math.min(Math.max(a.damping,.05),8)*t);for(let u=0;u<o;u++){let _=Math.max(u-1,0)*o,A=Math.min(u+1,s)*o,O=u*o;for(let T=0;T<o;T++){let w=O+T,P=O+Math.max(T-1,0),$=O+Math.min(T+1,s),B=D[w],se=D[P]+D[$]+D[_+T]+D[A+T]-4*B,[le,nt]=Ne(T,u),ot=c*Ue[nt]*Oe[le],rt=x*se-bt*B+ot,at=2*B-V[w]+d*rt,j=B+(at-B)*U;j>3.5?j=3.5:j<-3.5&&(j=-3.5),K[w]=j}}for(let u=0;u<o;u++){let _=u,A=0;a.pin==="bottom"?A=s:a.pin==="left"?(_=0,A=u):a.pin==="right"&&(_=s,A=u),K[A*o+_]=0}let W=V;V=D,D=K,K=W}function Ke(t,n,r){if(a.brush<=0||m.s<.01)return;let c=n/s,i=r/s,h=Math.max(a.brushSize,12),b=h/c,f=h/i,l=m.x/c,p=m.y/i,x=Math.max(Math.ceil(l-2.5*b),0),d=Math.min(Math.floor(l+2.5*b),s),U=Math.max(Math.ceil(p-2.5*f),0),W=Math.min(Math.floor(p+2.5*f),s),u=1.1*Math.min(a.brush,3)*m.s,_=Math.min(t*4,1);for(let A=U;A<=W;A++){let O=(A-p)/f,T=A*o;for(let w=x;w<=d;w++){let P=(w-l)/b,$=Math.exp(-(P*P+O*O));if($<.02)continue;let B=T+w,se=_*$,le=u*$;D[B]+=(le-D[B])*se,V[B]+=(le-V[B])*se}}}function te(t,n,r,c,i){let h=r*r;for(let b=0;b<o;b++){let f=b*n;Z[(f+c*t)*2+i]=0;let l=0;for(let p=c+1;p<o;p++){let x=f+p*t,d=y[x]-y[x-t];l+=r-Math.sqrt(Math.max(h-d*d,0)),Z[x*2+i]=-l}l=0;for(let p=c-1;p>=0;p--){let x=f+p*t,d=y[x]-y[x+t];l+=r-Math.sqrt(Math.max(h-d*d,0)),Z[x*2+i]=l}}}function Ze(t,n){let r=t/s,c=n/s,i=s>>1;a.pin==="top"||a.pin==="bottom"?(te(o,1,c,a.pin==="top"?0:s,1),te(1,o,r,i,0)):(te(1,o,r,a.pin==="left"?0:s,0),te(o,1,c,i,1))}function et(t,n){let r=Math.max(a.amplitude,0),c=a.drape*(.3+.7*ee),i=t/s,h=n/s,b=0;for(let f=0;f<o;f++){let l=f*o;for(let p=0;p<o;p++){let x=l+p,d=D[x];b=Math.max(b,Math.abs(d));let[U]=Ne(p,f);y[x]=r*Math.tanh(d)+c*be[U]}}Pe=b;for(let f=0;f<o;f++){let l=Math.max(f-1,0)*o,p=Math.min(f+1,s)*o,x=f*o;for(let d=0;d<o;d++){let U=x+d,W=x+Math.max(d-1,0),u=x+Math.min(d+1,s),_=(y[u]-y[W])/(2*i),A=(y[p+d]-y[l+d])/(2*h),O=1/Math.hypot(_,A,1),w=1-(y[W]+y[u]+y[l+d]+y[p+d]-4*y[U])*.01;w<.86?w=.86:w>1.06&&(w=1.06);let P=U*4;Y[P]=y[U],Y[P+1]=-_*O,Y[P+2]=-A*O,Y[P+3]=w}}Ze(t,n)}let I=[1,1,1],ge=document.createElement("canvas");ge.width=ge.height=1;let q=ge.getContext("2d",{willReadFrequently:!0});function ne(){if(a.backing!=="auto"){I=a.backing;return}if(I=[1,1,1],q){let t=F;for(;t;){let n=getComputedStyle(t).backgroundColor;if(n&&n!=="transparent"){q.clearRect(0,0,1,1),q.fillStyle=n,q.fillRect(0,0,1,1);let[r,c,i,h]=q.getImageData(0,0,1,1).data;if(h>0){I=[r/255,c/255,i/255];break}}t=t.parentElement}}}let oe=window.matchMedia("(prefers-reduced-motion: reduce)"),Ee=oe.matches;pe(),ne();function tt(){let t=Math.max(z.clientWidth,1),n=Math.max(z.clientHeight,1),r=Math.max(v.clientWidth,1),c=Math.max(v.clientHeight,1),i=Math.min(Math.max(a.light,0),1),h=Math.max(a.cornerRadius,0),b=Math.min(Math.max(a.shadow,0),1),f=.299*I[0]+.587*I[1]+.114*I[2],l=Math.min(Math.max((.5-f)/.35,0),1);e.bindFramebuffer(e.FRAMEBUFFER,null),e.viewport(0,0,v.width,v.height),e.clearColor(0,0,0,0),e.clear(e.COLOR_BUFFER_BIT),e.enable(e.BLEND),e.blendFunc(e.ONE,e.ONE_MINUS_SRC_ALPHA),e.bindVertexArray(he),e.bindBuffer(e.ARRAY_BUFFER,de),e.bufferSubData(e.ARRAY_BUFFER,0,Y),e.bindBuffer(e.ARRAY_BUFFER,ve),e.bufferSubData(e.ARRAY_BUFFER,0,Z),e.useProgram(C.program),e.uniform2f(C.uniforms.uRes,t,n),e.uniform2f(C.uniforms.uOut,r,c),e.uniform1f(C.uniforms.uBleed,k),e.uniform1f(C.uniforms.uShadow,b),e.uniform1f(C.uniforms.uRadius,h),e.uniform1f(C.uniforms.uDark,l),e.drawElements(e.TRIANGLES,S.length,e.UNSIGNED_INT,0),e.useProgram(M.program),e.activeTexture(e.TEXTURE0),e.bindTexture(e.TEXTURE_2D,J),e.uniform1i(M.uniforms.uContent,0),e.uniform2f(M.uniforms.uRes,t,n),e.uniform2f(M.uniforms.uOut,r,c),e.uniform1f(M.uniforms.uBleed,k),e.uniform1f(M.uniforms.uFocal,Math.max(a.perspective,200)),e.uniform1f(M.uniforms.uMaxX,Ie),e.uniform1f(M.uniforms.uLight,i),e.uniform1f(M.uniforms.uSheen,Math.max(a.sheen,0)),e.uniform1f(M.uniforms.uRadius,h),e.uniform1f(M.uniforms.uDark,l),e.uniform3f(M.uniforms.uBacking,I[0],I[1],I[2]),e.drawElements(e.TRIANGLES,S.length,e.UNSIGNED_INT,0),e.bindVertexArray(null)}let Re=0,Me=performance.now(),re=0,ye=!1,ae=!1,ie=!0;function ke(t){if(ye)return;if(!ie){ae=!1;return}let n=Math.min((t-Me)/1e3,1/20);Me=t;let r=Math.max(z.clientWidth,1),c=Math.max(z.clientHeight,1);if(!Ee){let i=xe,h=Math.max(.55+.35*Math.sin(i*.31+1.3)+.25*Math.sin(i*.83)*(.5+.5*Math.sin(i*.17)),.15);ee+=(h-ee)*Math.min(n*2,1);let b=N.inside&&a.brush>0?1:0,f=N.inside?8:2.5;m.s+=(b-m.s)*Math.min(n*f,1);let l=14;for(m.vx+=((N.x-m.x)*l*l-2*l*m.vx)*n,m.vy+=((N.y-m.y)*l*l-2*l*m.vy)*n,m.x+=m.vx*n,m.y+=m.vy*n,Ke(n,r,c),re=Math.min(re+n,ue*5);re>=ue;)Je(ue),re-=ue}if(et(r,c),tt(),Ee||a.wind<=.001&&Pe<.004&&m.s<.01){ae=!1;return}Re=requestAnimationFrame(ke)}function L(){H&&(ye||ae||!ie||(ae=!0,Me=performance.now(),Re=requestAnimationFrame(ke)))}Ce=L,L();function ze(){Ee=oe.matches,L()}oe.addEventListener("change",ze);let Ae=0;function we(){ne(),L(),window.clearTimeout(Ae),Ae=window.setTimeout(()=>{ne(),L()},300)}let He=new MutationObserver(we);He.observe(document.documentElement,{attributes:!0,attributeFilter:["class","style","data-theme"]});let Ge=window.matchMedia("(prefers-color-scheme: dark)");Ge.addEventListener("change",we);let Te=new ResizeObserver(()=>{pe(),L()});Te.observe(v),Te.observe(F);let We=new IntersectionObserver(t=>{ie=t[t.length-1]?.isIntersecting??!0,ie&&L()});We.observe(v);let ce=z,Xe=qe(z);function Ve(t){if(!H)return;let n=Xe.current,r=t.clientX-n.left,c=t.clientY-n.top;m.s<.01&&(m.x=r,m.y=c,m.vx=0,m.vy=0),N.x=r,N.y=c,N.inside=!0,L()}function Ye(){N.inside=!1}return ce.addEventListener("pointermove",Ve),ce.addEventListener("pointerleave",Ye),{setOptions(t){Object.entries(t).some(([n,r])=>a[n]!==r)&&(Object.assign(a,t),ne(),L())},resize(){pe(),L()},destroy(){ye=!0,Xe.destroy(),cancelAnimationFrame(Re),Te.disconnect(),We.disconnect(),He.disconnect(),Ge.removeEventListener("change",we),window.clearTimeout(Ae),oe.removeEventListener("change",ze),ce.removeEventListener("pointermove",Ve),ce.removeEventListener("pointerleave",Ye),e.deleteTexture(J),e.deleteProgram(M.program),e.deleteShader(M.vert),e.deleteShader(M.frag),e.deleteProgram(C.program),e.deleteShader(C.vert),e.deleteShader(C.frag),e.deleteBuffer(Be),e.deleteBuffer(de),e.deleteBuffer(ve),e.deleteBuffer(Se),e.deleteVertexArray(he),H&&(Q.onpaint=null)}}}return ft(gt);})();
+
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  var params = new URLSearchParams(location.search);
+  var STILL = params.has("still");
+  var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------------------------------------------------------
+     SYNTHETIC DATA — authored, labelled, generated in-browser
+     --------------------------------------------------------- */
+  var FIRST_PRESS = new Date(Date.UTC(2024, 3, 24));
+  var TOTAL_SEED = 14037831;          // the eternal count at page load
+  var RATE_PER_MIN = 41;              // presses arriving from other people
+
+  var total = TOTAL_SEED;
+  var mine = 0;
+
+  /* monthly record: monotonic, accelerating, deterministic */
+  function buildRecord() {
+    var out = [];
+    var now = new Date();
+    var m = new Date(FIRST_PRESS.getTime());
+    var i = 0;
+    while (m <= now) {
+      var t = i;
+      var v = Math.round(120000 * Math.pow(1.075, t) + 9000 * Math.sin(t * 0.9) + 42000);
+      out.push({ date: new Date(m.getTime()), presses: Math.max(v, 1000) });
+      m.setUTCMonth(m.getUTCMonth() + 1);
+      i++;
+    }
+    return out;
+  }
+  var record = buildRecord();
+
+  /* ---------------------------------------------------------
+     THE COUNT — fixed digit cells so a tick never reflows
+     --------------------------------------------------------- */
+  var countEl = document.getElementById("count");
+  var liveEl = document.getElementById("live");
+  var cells = [];
+
+  function groups(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  var STAGGER_STEP = 55; // ms between each cascading digit, left to right
+
+  function renderCount(value, animate) {
+    var s = groups(value);
+    if (cells.length !== s.length) {
+      countEl.textContent = "";
+      cells = [];
+      for (var i = 0; i < s.length; i++) {
+        var span = document.createElement("span");
+        if (s[i] === ",") {
+          span.className = "count__sep";
+          span.textContent = ",";
+        } else {
+          span.className = "digit";
+          var v = document.createElement("span");
+          v.className = "digit__v";
+          v.textContent = s[i];
+          span.appendChild(v);
+        }
+        countEl.appendChild(span);
+        cells.push(span);
+      }
+      return;
+    }
+
+    // Collect changed cells left-to-right; the cascade reads the same way,
+    // leftmost changed digit first.
+    var changed = [];
+    for (var j = 0; j < s.length; j++) {
+      var cell = cells[j];
+      if (cell.className === "count__sep") continue;
+      var val = cell.firstChild;
+      if (val.textContent === s[j]) continue;
+      val.textContent = s[j];
+      changed.push(cell);
+    }
+    if (!animate || reduced || !changed.length) return;
+
+    for (var rank = 0; rank < changed.length; rank++) {
+      var c = changed[rank];
+      c.style.setProperty("--stagger", rank * STAGGER_STEP + "ms");
+      c.classList.remove("is-rolling");
+      void c.offsetWidth;
+      c.classList.add("is-rolling");
+    }
+  }
+
+  renderCount(total, false);
+
+
+  /* ---------------------------------------------------------
+     THE PRESS
+     --------------------------------------------------------- */
+  var marks = document.querySelectorAll(".mark");
+  var lastPressed = marks[0];
+  var mineEl = document.getElementById("mine");
+  var shareMine = document.getElementById("share-mine");
+  var shareCap = document.getElementById("share-cap");
+
+  function bump(byMe) {
+    total += 1;
+    if (byMe) mine += 1;
+    renderCount(total, true);
+    paintYours();
+    paintBand();
+    announce(byMe);
+  }
+
+  Array.prototype.forEach.call(marks, function (m) {
+    m.addEventListener("click", function () { lastPressed = m; bump(true); });
+  });
+
+
+  /* ---------------------------------------------------------
+     ANNOUNCEMENTS — own press immediately, others throttled
+     --------------------------------------------------------- */
+  var lastAnnounce = 0;
+  function announce(immediate) {
+    var now = Date.now();
+    if (!immediate && now - lastAnnounce < 8000) return;
+    lastAnnounce = now;
+    liveEl.textContent = groups(total) + " presses";
+  }
+
+  /* ---------------------------------------------------------
+     REALTIME, FELT — irregular arrivals from other people
+     --------------------------------------------------------- */
+  function scheduleArrival() {
+    if (STILL) return;
+    var mean = 60000 / RATE_PER_MIN;
+    var gap = -Math.log(1 - Math.random()) * mean;
+    setTimeout(function () {
+      if (!document.hidden) bump(false);
+      scheduleArrival();
+    }, Math.max(220, gap));
+  }
+  scheduleArrival();
+
+  /* ---------------------------------------------------------
+     THE BAND'S PRINTED NUMBERS
+     --------------------------------------------------------- */
+  var edgeTotal = document.getElementById("edge-total");
+  var bandTotal = document.getElementById("band-total");
+  document.getElementById("band-rate").textContent = String(RATE_PER_MIN);
+
+  function paintBand() {
+    var g = groups(total);
+    edgeTotal.textContent = g;
+    bandTotal.textContent = g;
+  }
+  paintBand();
+
+  /* barcode: deterministic bars, not decoration for its own sake */
+  function drawBarcode(el, count) {
+    var seed = 4224;
+    var html = "";
+    for (var i = 0; i < count; i++) {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      var wide = (seed >> 7) % 3 === 0;
+      var half = (seed >> 11) % 5 === 0;
+      html += "<i class='" + (wide ? "w " : "") + (half ? "h" : "") + "'></i>";
+    }
+    el.innerHTML = html;
+  }
+  drawBarcode(document.getElementById("barcode"), 44);
+  drawBarcode(document.getElementById("barcode2"), 90);
+
+  /* ---------------------------------------------------------
+     THE RECORD
+     --------------------------------------------------------- */
+  var plot = document.getElementById("plot");
+  var max = record.reduce(function (a, r) { return Math.max(a, r.presses); }, 0);
+  var frag = document.createDocumentFragment();
+  record.forEach(function (r, i) {
+    var b = document.createElement("span");
+    b.className = "bar" + (i === record.length - 1 ? " bar--live" : "");
+    b.style.height = Math.max(2, (r.presses / max) * 100) + "%";
+    frag.appendChild(b);
+  });
+  plot.appendChild(frag);
+
+  function ym(d) {
+    return d.getUTCFullYear() + " · " + String(d.getUTCMonth() + 1).padStart(2, "0");
+  }
+  document.getElementById("axis-from").textContent = ym(record[0].date);
+  document.getElementById("axis-mid").textContent = ym(record[Math.floor(record.length / 2)].date);
+  document.getElementById("axis-to").textContent = ym(record[record.length - 1].date);
+  document.getElementById("rec-span").textContent = record.length + " months";
+  document.getElementById("band-months").textContent = record.length + " MONTHS";
+
+  /* ---------------------------------------------------------
+     YOURS
+     --------------------------------------------------------- */
+  var shareRatio = document.getElementById("share-ratio");
+
+  function paintYours() {
+    mineEl.textContent = groups(mine);
+    var share = mine / total;
+    var pct = share * 100;
+    shareMine.style.width = Math.max(0.18, pct) + "%";
+    shareCap.textContent =
+      mine === 0
+        ? "Press once and your share appears here"
+        : groups(mine) + " of " + groups(total) + " · " + pct.toFixed(7) + "%";
+    document.getElementById("scale-max").textContent = groups(total);
+    shareRatio.innerHTML =
+      mine === 0
+        ? "You have not pressed yet<br />The number moved anyway"
+        : "One press in " +
+          groups(Math.round(total / mine)) +
+          "<br />Synthetic";
+  }
+  paintYours();
+
+  /* ---------------------------------------------------------
+     CLOTH — the band hangs as paper when the browser allows it
+     --------------------------------------------------------- */
+  var clothState = document.getElementById("cloth-state");
+  var supported =
+    typeof ClothUI !== "undefined" && ClothUI.supportsHtmlInCanvas();
+
+  if (!supported) {
+    clothState.textContent = "Unsupported here — printed flat";
+  } else {
+    clothState.textContent = "Active — html-in-canvas";
+    var instances = [];
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-cloth]"),
+      function (wrap) {
+        var src = wrap.querySelector(".obi__src");
+        var content = wrap.querySelector(".obi__content");
+        var out = wrap.querySelector(".obi__out");
+        var home = content.parentNode;
+        src.hidden = false;
+        src.appendChild(content);
+        /* canvas defaults to 300x150 until sized. layoutsubtree lays the
+           moved-in content out against that bitmap box, not its CSS box —
+           left unset, the flag's real subtree layout shrinks the band's
+           content to a ~300px column instead of the full site width.
+           Match createCloth's own pe() dpr math exactly so this is the
+           final size, not a first pass — a second resize right after
+           clears the bitmap again and leaves a stale/fresh split seam
+           where the two draws disagree. */
+        var srcBox = wrap.getBoundingClientRect();
+        var srcDpr = Math.min(window.devicePixelRatio || 1, 2);
+        src.width = Math.max(1, Math.round(srcBox.width * srcDpr));
+        src.height = Math.max(1, Math.round(srcBox.height * srcDpr));
+        /* .obi__content's `inset:0` no longer resolves against the band
+           once it's reparented into the canvas: layoutsubtree doesn't
+           treat the canvas as its containing block, so the percentage
+           falls back to shrink-to-fit — the credits row's own content
+           width, not the band's. Pin it in px instead. */
+        content.style.width = srcBox.width + "px";
+        content.style.height = srcBox.height + "px";
+        var inst = null;
+        try {
+          inst = ClothUI.createCloth(
+          { source: src, content: content, output: out },
+          {
+            /* a paper obi band, not silk: stiff, shallow, slow */
+            pin: wrap.getAttribute("data-pin") || "top",
+            wind: reduced ? 0 : 1.15,
+            speed: 0.32,
+            amplitude: 23,
+            drape: 16,
+            damping: 1.7,
+            brush: reduced ? 0 : 1.5,
+            brushSize: 190,
+            light: 0.44,
+            sheen: 0.07,
+            shadow: 0.2,
+            cornerRadius: 0,
+            perspective: 1500,
+            backing: [0.894, 0.0, 0.31]
+            }
+          );
+        } catch (err) {
+          inst = null;
+        }
+        if (inst) {
+          instances.push(inst);
+        } else {
+          /* degrade to the flat print rather than an empty band */
+          src.hidden = true;
+          home.insertBefore(content, src.nextSibling);
+          clothState.textContent = "Failed to start — printed flat";
+        }
+      }
+    );
+    addEventListener(
+      "resize",
+      function () { instances.forEach(function (i) { i.resize(); }); },
+      { passive: true }
+    );
+  }
+})();
+</script>
