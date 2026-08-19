@@ -1,8 +1,8 @@
-import * as p from 'drizzle-orm/pg-core';
+import * as t from 'drizzle-orm/sqlite-core';
 
-export const counts = p.pgTable('count', {
-	id: p.serial().primaryKey(),
-	count: p.integer()
+export const counts = t.sqliteTable('counts', {
+	id: t.integer().primaryKey({ autoIncrement: true }),
+	count: t.integer().notNull().default(0)
 });
 
 export type InsertCount = typeof counts.$inferInsert;
