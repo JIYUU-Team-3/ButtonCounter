@@ -12,7 +12,8 @@
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"generate": "drizzle-kit generate --out migrations-folder --schema migrations/schema.ts --dialect turso"
 	},
 	"files": [
 		"dist",
