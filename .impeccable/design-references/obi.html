@@ -34,6 +34,15 @@
     --rule: 1px;
     --gut: clamp(1rem, 3.4vw, 2.75rem);
 
+    /* the notch, the home-indicator strip, the rounded-corner cutouts —
+       real on iOS Safari only when viewport-fit=cover asks the page to
+       draw under them (see the viewport meta tag). Elsewhere env()
+       resolves to 0 and every max() below just becomes --gut. */
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-r: env(safe-area-inset-right, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-l: env(safe-area-inset-left, 0px);
+
     --display: "Anton", "Haettenschweiler", "Arial Narrow", sans-serif;
     --text: "Archivo", ui-sans-serif, system-ui, sans-serif;
     --jp: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
@@ -82,15 +91,20 @@
     scroll-snap-align: start;
     scroll-snap-stop: always;
     min-height: 52svh;
-    padding: var(--gut);
+    padding-block: var(--gut);
+    /* left/right are physical device edges at every scroll position —
+       top/bottom safe areas only matter where a pane actually meets
+       them, handled below on .pane--face and .pane:last-child */
+    padding-inline: max(var(--gut), var(--safe-l)) max(var(--gut), var(--safe-r));
     display: flex;
     flex-direction: column;
   }
 
-  .pane:last-child { padding-bottom: calc(var(--gut) * 1.6); }
+  .pane:last-child { padding-bottom: calc(var(--gut) * 1.6 + var(--safe-b)); }
 
   .pane--face {
     min-height: 100svh;
+    padding-top: max(var(--gut), var(--safe-t));
     padding-bottom: 0;
     justify-content: center;
   }
@@ -101,8 +115,8 @@
 
   .spine {
     position: absolute;
-    top: var(--gut);
-    left: var(--gut);
+    top: max(var(--gut), var(--safe-t));
+    left: max(var(--gut), var(--safe-l));
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
@@ -221,6 +235,28 @@
     margin: 1.35rem 0 0;
   }
 
+  /* ---------- status strip — the connection told plainly ------
+     The one place this system states liveness instead of only showing
+     it: a silent stall (the count just stops) is indistinguishable from
+     nobody pressing right now, so when the feed actually dies it has to
+     say so. Built from primitives already in the system — the hairline
+     rule, obi red, the label voice — nothing new. */
+  .status {
+    margin: 0.85rem auto 0;
+    padding: 0.32rem 0.6rem;
+    max-width: 26rem;
+    border-top: var(--rule) solid var(--obi);
+    border-bottom: var(--rule) solid var(--obi);
+    font-size: 0.58rem;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--obi);
+    text-align: center;
+  }
+
+  .status[hidden] { display: none; }
+
   /* ---------- the mark, which is the button -------------------
      The face stays flat two-ink — no gradient, no bevel — but the depth
      is a real cast shadow: one shape, one direction, softened. The
@@ -267,22 +303,31 @@
                 box-shadow 190ms ease-out;
   }
 
-  /* hover lifts it off the sheet — the promise that it travels */
-  .mark:hover { --travel: -0.19rem; }
-  .mark:hover .mark__disc {
-    box-shadow:
-      0 0.22rem 0.34rem -0.04rem color-mix(in srgb, var(--ink) 42%, transparent),
-      0 0.85rem 1.05rem -0.15rem color-mix(in srgb, var(--ink) 36%, transparent);
+  /* hover lifts it off the sheet — the promise that it travels. Gated to
+     real hover-capable pointers: a touch tap fires :hover with no matching
+     leave event, so on a touch device the un-gated rule left the disc
+     stuck lifted after release — this is that fix. */
+  @media (hover: hover) and (pointer: fine) {
+    .mark:hover { --travel: -0.19rem; }
+    .mark:hover .mark__disc {
+      box-shadow:
+        0 0.22rem 0.34rem -0.04rem color-mix(in srgb, var(--ink) 42%, transparent),
+        0 0.85rem 1.05rem -0.15rem color-mix(in srgb, var(--ink) 36%, transparent);
+    }
   }
 
   /* pressed: it sinks and shrinks a little. The press itself is fast and
-     unsprung — only the release rings out. */
-  .mark:active { --travel: 0.3rem; --scale: 0.990; }
-  .mark:active .mark__disc {
+     unsprung — only the release rings out. .is-pressed is the pointer-event
+     twin of :active — set on pointerdown/removed on pointerup/cancel — so
+     the same sink happens whether the pointer is a mouse, a finger, or a
+     keyboard Space/Enter (:active still covers that case; :hover never
+     fires for it). */
+  .mark:active, .mark.is-pressed { --travel: 0.3rem; --scale: 0.990; }
+  .mark:active .mark__disc, .mark.is-pressed .mark__disc {
     transition: transform 90ms cubic-bezier(0.3, 0.7, 0.4, 1),
                 box-shadow 90ms ease-out;
   }
-  .mark:active .mark__disc {
+  .mark:active .mark__disc, .mark.is-pressed .mark__disc {
     box-shadow:
       0 0.05rem 0.1rem -0.02rem color-mix(in srgb, var(--ink) 44%, transparent),
       0 0.1rem 0.18rem -0.08rem color-mix(in srgb, var(--ink) 30%, transparent);
@@ -292,6 +337,24 @@
   .mark:focus-visible .mark__disc {
     outline: 2px solid var(--ink);
     outline-offset: 6px;
+  }
+
+  /* a press that didn't land: the same ring geometry as focus, in obi red
+     instead of ink — the system's one signal color — plus a brief shake.
+     Retry is the disc itself, pressed again; the system has exactly one
+     button and this state does not invent a second. */
+  .mark.is-failed .mark__disc {
+    outline: 2px solid var(--obi);
+    outline-offset: 6px;
+    animation: mark-shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+
+  @keyframes mark-shake {
+    0%, 100% { transform: translateY(var(--travel)) scale(var(--scale)) translateX(0); }
+    20%      { transform: translateY(var(--travel)) scale(var(--scale)) translateX(-0.16rem); }
+    40%      { transform: translateY(var(--travel)) scale(var(--scale)) translateX(0.14rem); }
+    60%      { transform: translateY(var(--travel)) scale(var(--scale)) translateX(-0.08rem); }
+    80%      { transform: translateY(var(--travel)) scale(var(--scale)) translateX(0.05rem); }
   }
 
   .mark__caption {
@@ -437,7 +500,12 @@
     justify-content: space-between;
     align-items: stretch;
     gap: clamp(0.9rem, 2.4vw, 2rem);
-    padding: clamp(0.9rem, 2.2vw, 1.7rem) var(--gut);
+    padding-block: clamp(0.9rem, 2.2vw, 1.7rem);
+    /* the band bleeds full-bleed via negative margin on its wrapper — this
+       padding is what brings the credits back off the physical edge, so
+       it carries the safe-area inset the same way the wrapper's bleed
+       ignores it */
+    padding-inline: max(var(--gut), var(--safe-l)) max(var(--gut), var(--safe-r));
     overflow: hidden;
   }
 
@@ -848,7 +916,9 @@
   }
 
   @media (max-width: 30rem) {
-    .credits { padding-inline: calc(var(--gut) * 0.8); }
+    .credits {
+      padding-inline: max(calc(var(--gut) * 0.8), var(--safe-l)) max(calc(var(--gut) * 0.8), var(--safe-r));
+    }
   }
 
   /* ============================================================
@@ -859,6 +929,7 @@
     .scroller { scroll-behavior: auto; }
     .digit.is-rolling { animation: none; }
     .mark, .mark__disc { transition: none; }
+    .mark.is-failed .mark__disc { animation: none; }
   }
 
   .sr {
@@ -907,13 +978,14 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <div>
         <div class="count" id="count" aria-hidden="true"></div>
         <p class="count__label" id="count-label">Presses, all of humanity, since 24 · 04 · 24</p>
+        <p class="status" id="status" role="status" aria-live="polite" hidden></p>
         <p class="sr" id="live" role="status" aria-live="polite"></p>
       </div>
 
       <button class="mark" id="mark" type="button">
         <span class="mark__disc" aria-hidden="true"></span>
-        <span class="mark__caption">Press</span>
-        <span class="sr">Add one to the count</span>
+        <span class="mark__caption" id="mark-caption">Press</span>
+        <span class="sr" id="mark-sr">Add one to the count</span>
       </button>
     </div>
 
@@ -1063,6 +1135,11 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <dd>Canvas UI · Cloth</dd>
           <dd id="cloth-state">—</dd>
           <dd>Paper texture is CSS, always on</dd>
+        </dl>
+        <dl>
+          <dt>Interaction</dt>
+          <dd id="haptics-state">—</dd>
+          <dd>Press feedback via pointer events</dd>
         </dl>
       </div>
 
@@ -1221,6 +1298,58 @@ void main () {
   var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------------------------------------------------------
+     CONNECTION STATE — mockup of the failure modes this surface
+     can actually have. No accounts, no forms, no server yet, so the
+     real candidates are: the device going offline, the realtime feed
+     silently dying (arrivals stop, count just stops), and a press that
+     didn't land. Forced deterministically via ?state= for review and
+     screenshots; offline also follows the real navigator events when
+     no state is forced, same pattern as Cloth support and
+     prefers-reduced-motion elsewhere in this file — detect what's real,
+     fake only the data.
+     ---------------------------------------------------------- */
+  var FORCED_STATE = params.get("state"); // "offline" | "frozen" | "failed"
+  var mode = "live";        // "live" | "offline" | "frozen"
+  var arrivalsPaused = false;
+  var failedVisual = false;
+
+  var statusEl = document.getElementById("status");
+  var captionEl = document.getElementById("mark-caption");
+  var markSrEl = document.getElementById("mark-sr");
+  var hapticsStateEl = document.getElementById("haptics-state");
+
+  var STATUS_COPY = {
+    offline: "Offline · your press will send when you're back",
+    frozen: "Connection lost · showing last known count"
+  };
+
+  function paintStatus() {
+    var text = mode === "live" ? "" : STATUS_COPY[mode];
+    if (text) {
+      statusEl.textContent = text;
+      statusEl.hidden = false;
+    } else {
+      statusEl.hidden = true;
+    }
+  }
+
+  function paintFailedVisual(marks) {
+    Array.prototype.forEach.call(marks, function (m) {
+      m.classList.toggle("is-failed", failedVisual);
+    });
+    captionEl.textContent = failedVisual ? "Tap to retry" : "Press";
+    markSrEl.textContent = failedVisual
+      ? "Your last press didn't land — tap to retry"
+      : "Add one to the count";
+  }
+
+  function setMode(next) {
+    mode = next;
+    arrivalsPaused = next !== "live";
+    paintStatus();
+  }
+
+  /* ---------------------------------------------------------
      SYNTHETIC DATA — authored, labelled, generated in-browser
      --------------------------------------------------------- */
   var FIRST_PRESS = new Date(Date.UTC(2024, 3, 24));
@@ -1326,9 +1455,78 @@ void main () {
     announce(byMe);
   }
 
-  Array.prototype.forEach.call(marks, function (m) {
-    m.addEventListener("click", function () { lastPressed = m; bump(true); });
+  /* light haptic on press, a distinct pattern on a failed attempt.
+     web-haptics (github.com/lochie/web-haptics): navigator.vibrate where
+     it exists, and on iOS Safari — which has no Vibration API at all —
+     a real system haptic via the hidden `<input type="checkbox" switch>`
+     tap trick, so this isn't Android-only progressive enhancement.
+     Loaded as a pinned CDN ESM build; degrades to visual-only feedback
+     if the import itself fails (offline, blocked). */
+  var haptics = null;
+  import("https://esm.sh/web-haptics@0.0.6").then(function (mod) {
+    haptics = new mod.WebHaptics();
+    hapticsStateEl.textContent = mod.WebHaptics.isSupported
+      ? "Active — Vibration API"
+      : "Fallback — iOS switch tap, else visual only";
+  }).catch(function () {
+    hapticsStateEl.textContent = "Unavailable — visual feedback only";
   });
+
+  function buzz(preset) {
+    if (haptics) haptics.trigger(preset);
+  }
+
+  function attemptPress(m) {
+    lastPressed = m;
+    if (mode === "frozen" && !failedVisual) {
+      // the feed is dead and this is the first attempt against it —
+      // optimistic bump, then the rollback: it never lands.
+      failedVisual = true;
+      paintFailedVisual(marks);
+      buzz("error");
+      return;
+    }
+    if (failedVisual) {
+      // retry: the disc is the only button in this system, so trying
+      // again is just pressing it again. The arrivals loop never
+      // stopped ticking underneath — it resumes on its own now that
+      // mode is back to "live".
+      failedVisual = false;
+      paintFailedVisual(marks);
+      setMode("live");
+    }
+    bump(true);
+  }
+
+  Array.prototype.forEach.call(marks, function (m) {
+    m.addEventListener("click", function () { attemptPress(m); });
+    /* .is-pressed mirrors :active for pointer devices — see the CSS
+       comment on why: touch needs an explicit press class, not just
+       reliance on :hover/:active, or release leaves the disc stuck. */
+    m.addEventListener("pointerdown", function () {
+      m.classList.add("is-pressed");
+      buzz("light");
+    });
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (evt) {
+      m.addEventListener(evt, function () { m.classList.remove("is-pressed"); });
+    });
+  });
+
+  if (FORCED_STATE === "offline") {
+    setMode("offline");
+  } else if (FORCED_STATE === "frozen") {
+    setMode("frozen");
+  } else if (FORCED_STATE === "failed") {
+    setMode("frozen");
+    failedVisual = true;
+    paintFailedVisual(marks);
+  }
+
+  if (!FORCED_STATE && typeof navigator.onLine === "boolean") {
+    if (!navigator.onLine) setMode("offline");
+    window.addEventListener("online", function () { setMode("live"); });
+    window.addEventListener("offline", function () { setMode("offline"); });
+  }
 
 
   /* ---------------------------------------------------------
@@ -1350,7 +1548,10 @@ void main () {
     var mean = 60000 / RATE_PER_MIN;
     var gap = -Math.log(1 - Math.random()) * mean;
     setTimeout(function () {
-      if (!document.hidden) bump(false);
+      // offline/frozen: the feed is down, so nothing arrives — the loop
+      // keeps ticking quietly underneath and resumes on its own the
+      // moment mode returns to "live", rather than needing a restart.
+      if (!document.hidden && !arrivalsPaused) bump(false);
       scheduleArrival();
     }, Math.max(220, gap));
   }
@@ -1481,7 +1682,7 @@ void main () {
             pin: wrap.getAttribute("data-pin") || "top",
             wind: reduced ? 0 : 1.15,
             speed: 0.32,
-            amplitude: 23,
+            amplitude: 32,
             drape: 16,
             damping: 1.7,
             brush: reduced ? 0 : 1.5,
