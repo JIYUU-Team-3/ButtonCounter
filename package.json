@@ -73,7 +73,8 @@
 		"socket.io-client": "^4.8.3",
 		"svelte-adapter-uws": "^0.5.8",
 		"svelte-realtime": "^0.5.11",
-		"tslog": "^5.1.0"
+		"tslog": "^5.1.0",
+		"uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.60.0"
 	},
 	"packageManager": "npm@11.0.0",
 	"allowScripts": {
