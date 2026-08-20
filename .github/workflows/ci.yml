@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [development, main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Unit tests run in a real browser via vitest-browser-svelte.
+      - run: npx playwright install chromium --with-deps
+
+      - run: npm run lint
+
+      # Build first: the paraglide vite plugin generates src/lib/paraglide,
+      # which is gitignored. check and test cannot resolve $lib/paraglide/*
+      # until it exists.
+      - run: npm run build
+
+      - run: npm run check
+      - run: npm run test
+
+  deploy:
+    name: Deploy to production
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      # Fly builds the image remotely from the Dockerfile.
+      # Runtime env comes from Fly secrets, not from this workflow.
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
