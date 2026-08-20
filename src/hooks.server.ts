@@ -13,13 +13,13 @@ import { dev } from '$app/environment';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	if (!event.cookies.get('visitor_id')) {
-		event.cookies.set('vistor_id', crypto.randomUUID(), {
+		event.cookies.set('visitor_id', crypto.randomUUID(), {
 			path: '/',
 			httpOnly: true,
 			sameSite: 'lax',
 			secure: !dev,
 			maxAge: 60 * 60 * 24 * 365
-		})
+		});
 	}
 	return resolve(event);
 };
