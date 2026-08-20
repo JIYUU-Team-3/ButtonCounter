@@ -51,7 +51,6 @@ function subscribe(listener: Listener): () => void {
 	return () => listeners.delete(listener);
 }
 
-
 export async function* watchCount(signal: AbortSignal): AsyncGenerator<number> {
 	let latest = await readCount();
 	let sent = latest;
