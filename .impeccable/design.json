@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-19T00:00:00Z",
+  "title": "Design System: Button Counter — The Obi Band",
+  "extensions": {
+    "colorMeta": {
+      "obi-red": {
+        "role": "primary",
+        "displayName": "Obi Red",
+        "canonical": "#e4004f",
+        "tonalRamp": ["oklch(15% 0.05 10)", "oklch(24% 0.09 10)", "oklch(33% 0.13 10)", "oklch(42% 0.17 10)", "oklch(55% 0.22 10)", "oklch(66% 0.19 10)", "oklch(78% 0.13 10)", "oklch(90% 0.06 10)"]
+      },
+      "foil-gold": {
+        "role": "secondary",
+        "displayName": "Foil Gold",
+        "canonical": "#8a6220",
+        "tonalRamp": ["oklch(12% 0.02 70)", "oklch(22% 0.04 70)", "oklch(31% 0.06 70)", "oklch(40% 0.08 70)", "oklch(47% 0.09 70)", "oklch(60% 0.08 70)", "oklch(75% 0.06 70)", "oklch(90% 0.03 70)"]
+      },
+      "risograph-red": {
+        "role": "tertiary",
+        "displayName": "Risograph Red",
+        "canonical": "#ff2a5b",
+        "tonalRamp": ["oklch(18% 0.06 5)", "oklch(28% 0.11 5)", "oklch(38% 0.16 5)", "oklch(48% 0.21 5)", "oklch(65% 0.24 5)", "oklch(75% 0.19 5)", "oklch(85% 0.11 5)", "oklch(95% 0.04 5)"]
+      },
+      "sleeve-cream": {
+        "role": "neutral",
+        "displayName": "Sleeve Cream",
+        "canonical": "#f7f3eb",
+        "tonalRamp": ["oklch(15% 0.005 80)", "oklch(28% 0.006 80)", "oklch(42% 0.007 80)", "oklch(56% 0.008 80)", "oklch(70% 0.009 80)", "oklch(84% 0.01 80)", "oklch(92% 0.01 80)", "oklch(96% 0.01 80)"]
+      },
+      "ink-black": {
+        "role": "neutral",
+        "displayName": "Ink Black",
+        "canonical": "#111111",
+        "tonalRamp": ["oklch(9% 0 0)", "oklch(20% 0 0)", "oklch(32% 0 0)", "oklch(45% 0 0)", "oklch(58% 0 0)", "oklch(70% 0 0)", "oklch(83% 0 0)", "oklch(95% 0 0)"]
+      },
+      "bright-white": {
+        "role": "neutral",
+        "displayName": "Bright White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["oklch(20% 0 0)", "oklch(35% 0 0)", "oklch(50% 0 0)", "oklch(65% 0 0)", "oklch(78% 0 0)", "oklch(88% 0 0)", "oklch(95% 0 0)", "oklch(100% 0 0)"]
+      },
+      "paper-gray": {
+        "role": "neutral",
+        "displayName": "Paper Gray",
+        "canonical": "#d9d7d2",
+        "tonalRamp": ["oklch(18% 0.003 90)", "oklch(30% 0.003 90)", "oklch(44% 0.004 90)", "oklch(58% 0.004 90)", "oklch(70% 0.005 90)", "oklch(80% 0.005 90)", "oklch(87% 0.005 90)", "oklch(94% 0.005 90)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The eternal count, and the visitor's personal count on the Yours pane. Never anything else." },
+      "headline": { "displayName": "Headline", "purpose": "The Button Counter wordmark, repeated on the spine and every obi band." },
+      "title": { "displayName": "Title", "purpose": "Pane section titles: The record, Yours, Colophon." },
+      "body": { "displayName": "Body", "purpose": "The single reading paragraph — the synthetic-data disclosure in the colophon." },
+      "label": { "displayName": "Label", "purpose": "Every annotative micro-caption: count label, button caption, pane metadata, catalog, barcode, axis ticks." },
+      "credits-jp": { "displayName": "Credits JP", "purpose": "Bilingual vertical credit columns on the obi band." }
+    },
+    "shadows": [
+      { "name": "disc-rest", "value": "0 0.14rem 0.24rem -0.06rem color-mix(in srgb, var(--ink) 40%, transparent), 0 0.5rem 0.7rem -0.28rem color-mix(in srgb, var(--ink) 34%, transparent)", "purpose": "Press disc at rest — contact shadow plus short ambient cast." },
+      { "name": "disc-hover", "value": "0 0.22rem 0.34rem -0.04rem color-mix(in srgb, var(--ink) 42%, transparent), 0 0.85rem 1.05rem -0.15rem color-mix(in srgb, var(--ink) 36%, transparent)", "purpose": "Press disc lifted on hover." },
+      { "name": "disc-active", "value": "0 0.05rem 0.1rem -0.02rem color-mix(in srgb, var(--ink) 44%, transparent), 0 0.1rem 0.18rem -0.08rem color-mix(in srgb, var(--ink) 30%, transparent)", "purpose": "Press disc sunk on press — near-flat contact only." },
+      { "name": "band-wrap", "value": "inset 0 9px 15px -10px rgba(0,0,0,0.34), inset 0 -9px 15px -10px rgba(0,0,0,0.28)", "purpose": "The obi band's folded head/foot edge — a bevel, not a lift." }
+    ],
+    "motion": [
+      { "name": "spring-release", "value": "linear(0 0%, 0.1085 3.1%, 0.3601 6.2%, 0.6546 9.4%, 0.9174 12.5%, 1.1063 15.6%, 1.2085 18.8%, 1.2332 21.9%, 1.2021 25%, 1.1408 28.1%, 1.0721 31.2%, 1.0126 34.4%, 0.971 37.5%, 0.9496 40.6%, 0.9458 43.8%, 0.9543 46.9%, 0.9692 50%, 0.9851 53.1%, 0.9986 56.2%, 1.0077 59.4%, 1.0121 62.5%, 1.0125 65.6%, 1.0103 68.8%, 1.0067 71.9%, 1.003 75%, 1 78.1%, 0.998 81.2%, 0.9971 84.4%, 0.9971 87.5%, 0.9977 90.6%, 0.9985 93.8%, 0.9994 96.9%, 1 100%)", "purpose": "Underdamped spring (zeta 0.42, ~23% overshoot) driving the press disc's release/hover transform, 620ms. Press itself uses a fast unsprung ease-out instead — going down is instant, only the release rings." },
+      { "name": "digit-roll", "value": "340ms cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "A changed count digit's roll-and-settle: translateY + opacity + blur, iOS numeric-switcher style. Only changed digits animate." },
+      { "name": "digit-stagger", "value": "55ms per cell", "purpose": "Leftmost changed digit animates first, cascading rightward across the number." },
+      { "name": "disc-press", "value": "90ms cubic-bezier(0.3, 0.7, 0.4, 1)", "purpose": "Fast, unsprung press-down transition — deliberately not the spring." }
+    ],
+    "breakpoints": [
+      { "name": "tablet-down", "value": "46rem" },
+      { "name": "narrow", "value": "30rem" }
+    ]
+  },
+  "components": [
+    {
+      "name": "The Mark (Press Button)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The product's single primary action: a solid obi-red disc with a fiber-texture overlay. Caption sits below via absolute position so it never competes with the disc's silhouette.",
+      "html": "<button class=\"ds-mark\" type=\"button\"><span class=\"ds-mark__disc\" aria-hidden=\"true\"></span><span class=\"ds-mark__caption\">Press</span></button>",
+      "css": ".ds-mark { appearance: none; border: 0; padding: 0; background: none; cursor: pointer; display: block; width: clamp(9.2rem, 25vw, 13.5rem); height: clamp(9.2rem, 25vw, 13.5rem); border-radius: 50%; position: relative; margin-bottom: 3rem; } .ds-mark__disc { position: absolute; inset: 0; border-radius: 50%; background: #e4004f; box-shadow: 0 0.14rem 0.24rem -0.06rem rgba(17,17,17,0.4), 0 0.5rem 0.7rem -0.28rem rgba(17,17,17,0.34); transition: transform 620ms linear(0 0%, 0.1085 3.1%, 0.3601 6.2%, 0.6546 9.4%, 0.9174 12.5%, 1.1063 15.6%, 1.2085 18.8%, 1.2332 21.9%, 1.2021 25%, 1.1408 28.1%, 1.0721 31.2%, 1.0126 34.4%, 0.971 37.5%, 0.9496 40.6%, 0.9458 43.8%, 0.9543 46.9%, 0.9692 50%, 0.9851 53.1%, 0.9986 56.2%, 1.0077 59.4%, 1.0121 62.5%, 1.0125 65.6%, 1.0103 68.8%, 1.0067 71.9%, 1.003 75%, 1 78.1%, 0.998 81.2%, 0.9971 84.4%, 0.9971 87.5%, 0.9977 90.6%, 0.9985 93.8%, 0.9994 96.9%, 1 100%), box-shadow 190ms ease-out; } .ds-mark:hover .ds-mark__disc { transform: translateY(-0.19rem); box-shadow: 0 0.22rem 0.34rem -0.04rem rgba(17,17,17,0.42), 0 0.85rem 1.05rem -0.15rem rgba(17,17,17,0.36); } .ds-mark:active .ds-mark__disc { transform: translateY(0.3rem) scale(0.99); transition: transform 90ms cubic-bezier(0.3,0.7,0.4,1), box-shadow 90ms ease-out; box-shadow: 0 0.05rem 0.1rem -0.02rem rgba(17,17,17,0.44), 0 0.1rem 0.18rem -0.08rem rgba(17,17,17,0.3); } .ds-mark:focus-visible { outline: none; } .ds-mark:focus-visible .ds-mark__disc { outline: 2px solid #111111; outline-offset: 6px; } .ds-mark__caption { position: absolute; top: calc(100% + 1.15rem); left: 50%; transform: translateX(-50%); white-space: nowrap; font-family: Archivo, sans-serif; font-size: 0.62rem; letter-spacing: 0.26em; text-transform: uppercase; font-weight: 600; color: #111111; }"
+    },
+    {
+      "name": "Count Display",
+      "kind": "custom",
+      "refersTo": "count-display",
+      "description": "The eternal count in foil gold, fixed-width digit cells so a tick never reflows. Only changed digits animate, cascading left to right.",
+      "html": "<div class=\"ds-count\"><span class=\"ds-digit\"><span class=\"ds-digit__v\">1</span></span><span class=\"ds-digit\"><span class=\"ds-digit__v\">4</span></span><span class=\"ds-count__sep\">,</span><span class=\"ds-digit\"><span class=\"ds-digit__v\">0</span></span></div>",
+      "css": ".ds-count { display: flex; align-items: baseline; justify-content: center; gap: 0.02em; font-family: Anton, sans-serif; font-size: clamp(3.4rem, 15.5vw, 12rem); line-height: 0.84; color: #8a6220; transform: scaleX(0.9); } .ds-digit { display: inline-block; width: 0.58em; text-align: center; position: relative; } .ds-digit__v { display: block; padding-block: 0.42em; margin-block: -0.42em; } .ds-count__sep { width: 0.22em; } .ds-digit.is-rolling .ds-digit__v { animation: ds-roll 340ms cubic-bezier(0.22,1,0.36,1) both; } @keyframes ds-roll { 0% { transform: translateY(0.22em); opacity: 0; filter: blur(0.07em); } 60% { opacity: 1; filter: blur(0.02em); } 100% { transform: translateY(0); opacity: 1; filter: blur(0); } }"
+    },
+    {
+      "name": "Label (Micro Caption)",
+      "kind": "custom",
+      "refersTo": "label-micro",
+      "description": "The recurring uppercase tracked-out annotation: count label, button caption, pane metadata, catalog, axis ticks. Always sits beside or beneath its subject, never as a pre-headline kicker.",
+      "html": "<p class=\"ds-label\">Presses, all of humanity, since 24 · 04 · 24</p>",
+      "css": ".ds-label { font-family: Archivo, sans-serif; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: #111111; margin: 0; }"
+    },
+    {
+      "name": "Obi Band",
+      "kind": "custom",
+      "refersTo": "obi-band",
+      "description": "Signature component: full-bleed red band with wordmark, bilingual vertical credit columns, and a woven-paper surface built from layered gradients + SVG turbulence noise. Always rendered flat; Canvas UI Cloth (html-in-canvas WebGL drape) layers on top as enhancement only, scoped to this element so it never breaks the page's scroll-snap.",
+      "html": "<div class=\"ds-obi\"><span class=\"ds-obi__weave\" aria-hidden=\"true\"></span><div class=\"ds-obi__credits\"><p class=\"ds-obi__mark\">Button<br/>Counter</p><div class=\"ds-obi__vcols\"><span class=\"ds-obi__vcol\">ボタン・カウンター</span></div></div></div>",
+      "css": ".ds-obi { position: relative; background: #e4004f; color: #ffffff; overflow: hidden; } .ds-obi__weave { position: absolute; inset: 0; background-color: #e4004f; box-shadow: inset 0 9px 15px -10px rgba(0,0,0,0.34), inset 0 -9px 15px -10px rgba(0,0,0,0.28); } .ds-obi__credits { position: relative; z-index: 1; display: flex; justify-content: space-between; padding: clamp(0.9rem, 2.2vw, 1.7rem) clamp(1rem, 3.4vw, 2.75rem); } .ds-obi__mark { font-family: Anton, sans-serif; font-size: clamp(2rem, 5vw, 4.2rem); line-height: 0.78; text-transform: uppercase; transform: scaleX(0.86); margin: 0; } .ds-obi__vcols { display: flex; flex-direction: row-reverse; gap: clamp(0.55rem, 1.5vw, 1.15rem); } .ds-obi__vcol { writing-mode: vertical-rl; font-family: 'Zen Kaku Gothic New', sans-serif; font-size: clamp(0.6rem, 1.15vw, 0.78rem); letter-spacing: 0.14em; line-height: 1.5; font-weight: 500; white-space: nowrap; }"
+    },
+    {
+      "name": "Chip (Outline)",
+      "kind": "chip",
+      "refersTo": "chip-outline",
+      "description": "The system's default chip: transparent fill, 1px white border, worn on the red band (e.g. the 'Synthetic' catalog tag).",
+      "html": "<span class=\"ds-chip\">Synthetic</span>",
+      "css": ".ds-chip { display: inline-block; border: 1px solid #ffffff; padding: 0.16rem 0.42rem; font-family: Archivo, sans-serif; font-size: 0.55rem; letter-spacing: 0.18em; font-weight: 600; text-transform: uppercase; color: #ffffff; }"
+    },
+    {
+      "name": "Synthetic Disclosure Callout",
+      "kind": "card",
+      "refersTo": null,
+      "description": "The colophon's data-provenance box: 2px obi-red border, no fill, the system's only sustained reading paragraph.",
+      "html": "<div class=\"ds-synthetic\"><b>Every figure on this page is synthetic</b>The eternal count, the monthly record, the press rate and your own press total are authored demonstration data generated in this browser.</div>",
+      "css": ".ds-synthetic { border: 2px solid #e4004f; padding: 0.7rem 0.85rem; font-family: Archivo, sans-serif; font-size: 0.68rem; line-height: 1.4; color: #111111; font-weight: 500; } .ds-synthetic b { display: block; font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: #e4004f; margin-bottom: 0.3rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Obi Band",
+    "overview": "A Tokyo boutique-pop sleeve for a single, eternal number. The page is printed, not screened: two inks — cream stock and obi red — on a fine-tooth uncoated ground, with exactly one color allowed to behave like something other than ink: the gold foil the count is set in. Everything else is flat, square-cornered, and hairline-ruled, as if it came off a press rather than out of a UI kit. It refuses the category default of a glowing counter centered on a dark ground with a pill button beneath it — here the ground is bare and light, the button is a single printed disc, and depth is earned by one real cast shadow rather than borrowed from gradients or glow.\n\nThe system is dense with meaning-bearing micro-copy (catalog numbers, vertical Japanese credit columns, a barcode, a colophon) but never decorative kicker copy — every small-caps line names the number, control, or fact sitting beside it. The signature device is the obi band itself: a wrapped, textured red band that crosses the bottom of the hero and unwraps into a full-width credits strip as the visitor scrolls, built with Canvas UI's Cloth (html-in-canvas WebGL drape) as a progressive enhancement over a flat CSS/SVG weave that is always present and always legible on its own.",
+    "keyCharacteristics": [
+      "Two-ink print palette (cream + obi red) plus one foil ink reserved for the count alone",
+      "Anton display type, mechanically squeezed, never used below title scale; Archivo for everything readable",
+      "Exactly one rounded shape in the whole system — the press disc — against square corners everywhere else",
+      "One real elevation: a soft, two-layer cast shadow on the press disc; everything else is flat print or an inset \"fold\" bevel",
+      "Scroll-snap panes (100svh hero, ~52svh panes after) with a printed band that wraps and unwraps as the mechanism of scroll"
+    ],
+    "rules": [
+      { "name": "The One Foil Rule", "body": "Foil gold is spent in exactly one place: the eternal count, at display scale. It does not repeat as a small-text color or a general accent; the build's one confirmed use below display scale (the .share__tag chip at 0.55rem, cream-on-foil) is a carried defect, not a pattern to extend.", "section": "colors" },
+      { "name": "The One Ghost Rule", "body": "Risograph red exists only inside the misregistration effect on the record chart. A future surface that wants a \"second red\" should not reach for #ff2a5b; it isn't a palette color, it's a printing artifact.", "section": "colors" },
+      { "name": "The Anton-Only Display Rule", "body": "Condensed display type never appears below title scale (~1.15rem). Body copy and every label are always Archivo — the system never uses the display face for anything meant to be read at length or at small size.", "section": "typography" },
+      { "name": "The Half-Pane Rule", "body": "The hero is always a full 100svh. Every following pane snaps to roughly half a viewport (~52svh desktop, 56svh mobile) — panes are deliberately incomplete at rest, inviting the next scroll rather than presenting a full \"page.\"", "section": "layout" },
+      { "name": "The One Lift Rule", "body": "Exactly one element in the system casts a real, non-inset shadow: the press disc. Every other surface is flat print or conveyed with an inset fold. A future component should not add ambient card shadows to match generic UI conventions — that vocabulary doesn't exist here.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do reserve foil gold (#8a6220) for the eternal count at display scale — the system's one emissive-reading color.",
+      "Do keep Anton confined to display/headline/title scale (≥~1.15rem); everything smaller is Archivo.",
+      "Do set every annotative label in uppercase Archivo, 0.55–0.62rem, 0.17–0.26em tracking, and place it beside or beneath the figure it names — never above a headline as a pre-announcement.",
+      "Do give the press disc a soft, two-layer cast shadow (contact + ambient) for its rest/hover/active states; use the documented exact values, not a generic drop-shadow.",
+      "Do keep corners square everywhere except the press disc; 50% radius is spent in exactly one place.",
+      "Do keep the obi band's flat CSS/SVG weave as the real, always-rendered surface; treat Cloth strictly as an enhancement layered on top, scoped to band elements only."
+    ],
+    "donts": [
+      "Don't use risograph red (#ff2a5b) as a general secondary accent — it is confined to the single misregistration-ghost effect on the record chart.",
+      "Don't repeat the foil-on-small-text pattern from .share__tag (cream text on foil gold at 0.55rem). Its contrast was never machine-verified (detect.mjs ran degraded for this build) and it reads noticeably weaker than the rest of the label system — it is a carried defect from this build, not a system rule for new surfaces.",
+      "Don't add a hard-offset, high-contrast \"neobrutalist\" shadow anywhere in this system; its only elevation vocabulary is the soft two-layer cast shadow on the disc and the inset fold on the band.",
+      "Don't reuse the scaleX(0.86)/scaleX(0.9) horizontal squeeze on body copy, labels, or any non-Anton, non-display-scale type — it's a corrective specific to Anton at large sizes, not a general transform.",
+      "Don't invent a second button style (ghost, outline, secondary); the product has exactly one action and the system reflects that with exactly one button."
+    ]
+  }
+}
