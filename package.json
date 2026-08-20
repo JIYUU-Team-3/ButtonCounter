@@ -12,7 +12,9 @@
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"generate": "drizzle-kit generate --config drizzle.config.ts",
+		"migrate": "drizzle-kit migrate --config drizzle.config.ts"
 	},
 	"files": [
 		"dist",
