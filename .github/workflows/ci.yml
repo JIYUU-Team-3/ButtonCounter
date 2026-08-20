@@ -28,9 +28,14 @@ jobs:
       - run: npx playwright install chromium --with-deps
 
       - run: npm run lint
+
+      # Build first: the paraglide vite plugin generates src/lib/paraglide,
+      # which is gitignored. check and test cannot resolve $lib/paraglide/*
+      # until it exists.
+      - run: npm run build
+
       - run: npm run check
       - run: npm run test
-      - run: npm run build
 
   deploy:
     name: Deploy to production
