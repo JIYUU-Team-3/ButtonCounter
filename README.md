@@ -78,3 +78,4 @@ Afterward, run the command below to migrate schema to turso
 ```sh
 npm run generate
 ```
+Deployed Website: https://button-counter-mellowing-island-2485.fly.dev/ 
