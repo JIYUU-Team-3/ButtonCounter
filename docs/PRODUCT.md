@@ -39,7 +39,6 @@ intelligible and pressable within one viewport, before any scroll.
 ## Capabilities and Constraints
 
 Confirmed:
-
 - A single global counter, monotonically increasing, shared by all visitors.
 - Realtime propagation of increments to every connected client.
 - History over time: the count's growth as a chart / temporal record.
@@ -49,7 +48,6 @@ Confirmed:
   scroll. The first viewport belongs to the number and the button alone.
 
 Explicitly not in scope (asked and declined):
-
 - Live presence ("N people online", geography of pressers).
 - A live event feed of individual presses as discrete items.
 - Teams, regions, milestones, goals, resets, or decay.
