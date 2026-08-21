@@ -46,10 +46,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: npm i -g @railway/cli
 
-      # Fly builds the image remotely from the Dockerfile.
-      # Runtime env comes from Fly secrets, not from this workflow.
-      - run: flyctl deploy --remote-only
+      # Railway builds the image from the Dockerfile.
+      # Runtime env comes from Railway variables, not from this workflow.
+      - run: railway up --service "$RAILWAY_SERVICE" --ci
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE: button-counter
