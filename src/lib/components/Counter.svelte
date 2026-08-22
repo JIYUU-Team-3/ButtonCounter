@@ -535,18 +535,11 @@
 
 				<div class="vcols">
 					<span class="vcol" aria-hidden="true">ボタン・カウンター</span>
-					<span class="vcol vcol--thin" aria-hidden="true">一つの数字</span>
-					<span class="vcol vcol--thin" aria-hidden="true">自由チーム</span>
-					<span class="vcol vcol--thin vcol--en" aria-hidden="true">SVELTEKIT</span>
-					<span class="vcol vcol--thin vcol--en" aria-hidden="true">TYPESCRIPT</span>
-					<span class="vcol vcol--thin vcol--en" aria-hidden="true">TURSO</span>
-					<ul class="vcols__names" lang="ja">
-						<li class="vcol vcol--thin">サティヤ</li>
-						<li class="vcol vcol--thin">ティシャ</li>
-						<li class="vcol vcol--thin">マーヌット</li>
-						<li class="vcol vcol--thin">ポーチェン</li>
-						<li class="vcol vcol--thin">ヴィサル</li>
-					</ul>
+					<span class="vcol" lang="ja">サティヤ</span>
+					<span class="vcol" lang="ja">ティシャ</span>
+					<span class="vcol" lang="ja">マーヌット</span>
+					<span class="vcol" lang="ja">ポーチェン</span>
+					<span class="vcol" lang="ja">ヴィサル</span>
 				</div>
 			</div>
 		</div>
@@ -1047,13 +1040,6 @@
 		transform-origin: left top;
 		margin: 0;
 		flex: none;
-	}
-
-	.vcols__names {
-		display: contents;
-		margin: 0;
-		padding: 0;
-		list-style: none;
 	}
 
 	.vcols {
