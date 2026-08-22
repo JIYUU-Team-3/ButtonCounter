@@ -532,13 +532,14 @@
 				<div class="credits__block">
 					<p class="credits__mark">Button<br />Counter</p>
 				</div>
-				<div class="vcols" aria-hidden="true">
-					<span class="vcol">ボタン・カウンター</span>
-					<span class="vcol vcol--thin">一つの数字</span>
-					<span class="vcol vcol--thin">自由チーム</span>
-					<span class="vcol vcol--thin vcol--en">SVELTEKIT</span>
-					<span class="vcol vcol--thin vcol--en">TYPESCRIPT</span>
-					<span class="vcol vcol--thin vcol--en">TURSO</span>
+
+				<div class="vcols">
+					<span class="vcol" aria-hidden="true">ボタン・カウンター</span>
+					<span class="vcol" lang="ja">サティヤ</span>
+					<span class="vcol" lang="ja">ティシャ</span>
+					<span class="vcol" lang="ja">マーヌット</span>
+					<span class="vcol" lang="ja">ポーチェン</span>
+					<span class="vcol" lang="ja">ヴィサル</span>
 				</div>
 			</div>
 		</div>
@@ -1097,6 +1098,9 @@
 	}
 
 	.band--edge .vcols {
+		/* shrink to the columns themselves so .credits' space-between keeps
+		   them against the band's right edge */
+		flex: 0 1 auto;
 		justify-content: flex-end;
 		gap: clamp(0.7rem, 2.2vw, 1.9rem);
 		margin-bottom: calc(var(--safe-b) * -1);
@@ -1115,7 +1119,7 @@
 			gap: clamp(2.2rem, 7vh, 4rem);
 		}
 		.credits__block {
-			max-width: 46%;
+			max-width: 34%;
 		}
 		.vcol--en {
 			display: none;
