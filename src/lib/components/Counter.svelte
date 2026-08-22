@@ -533,24 +533,20 @@
 					<p class="credits__mark">Button<br />Counter</p>
 				</div>
 
-				<div class="credits__team">
-					<p class="credits__team-title">Built by</p>
-					<ul class="credits__names">
-						<li>Tith Sathya</li>
-						<li>Nuon Uteytithya</li>
-						<li>Hout Manut</li>
-						<li>Cheng Porchheng</li>
-						<li>Sao Visal</li>
+				<div class="vcols">
+					<span class="vcol" aria-hidden="true">ボタン・カウンター</span>
+					<span class="vcol vcol--thin" aria-hidden="true">一つの数字</span>
+					<span class="vcol vcol--thin" aria-hidden="true">自由チーム</span>
+					<span class="vcol vcol--thin vcol--en" aria-hidden="true">SVELTEKIT</span>
+					<span class="vcol vcol--thin vcol--en" aria-hidden="true">TYPESCRIPT</span>
+					<span class="vcol vcol--thin vcol--en" aria-hidden="true">TURSO</span>
+					<ul class="vcols__names" lang="ja">
+						<li class="vcol vcol--thin">サティヤ</li>
+						<li class="vcol vcol--thin">ティシャ</li>
+						<li class="vcol vcol--thin">マーヌット</li>
+						<li class="vcol vcol--thin">ポーチェン</li>
+						<li class="vcol vcol--thin">ヴィサル</li>
 					</ul>
-				</div>
-
-				<div class="vcols" aria-hidden="true">
-					<span class="vcol">ボタン・カウンター</span>
-					<span class="vcol vcol--thin">一つの数字</span>
-					<span class="vcol vcol--thin">自由チーム</span>
-					<span class="vcol vcol--thin vcol--en">SVELTEKIT</span>
-					<span class="vcol vcol--thin vcol--en">TYPESCRIPT</span>
-					<span class="vcol vcol--thin vcol--en">TURSO</span>
 				</div>
 			</div>
 		</div>
@@ -1053,51 +1049,11 @@
 		flex: none;
 	}
 
-	.credits__team {
-		flex: 1 1 auto;
-		min-width: 0;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		gap: 0.4rem;
-		color: var(--white);
-		padding-right: clamp(0.6rem, 2vw, 1.6rem);
-	}
-
-	.credits__team-title {
-		margin: 0;
-		font-size: 0.55rem;
-		font-weight: 400;
-		letter-spacing: 0.2em;
-		line-height: 1.4;
-		text-transform: uppercase;
-	}
-
-	.credits__names {
+	.vcols__names {
+		display: contents;
 		margin: 0;
 		padding: 0;
 		list-style: none;
-		display: flex;
-		flex-wrap: wrap;
-		column-gap: 0.55rem;
-		row-gap: 0.15rem;
-		font-size: 0.55rem;
-		font-weight: 600;
-		letter-spacing: 0.18em;
-		line-height: 1.5;
-		text-transform: uppercase;
-	}
-
-	.credits__names li {
-		display: flex;
-		align-items: center;
-		gap: 0.55rem;
-		white-space: nowrap;
-	}
-
-	.credits__names li:not(:last-child)::after {
-		content: '\00b7';
-		font-weight: 400;
 	}
 
 	.vcols {
@@ -1156,6 +1112,8 @@
 	}
 
 	.band--edge .vcols {
+		/* shrink to the columns themselves so .credits' space-between keeps
+		   them against the band's right edge */
 		flex: 0 1 auto;
 		justify-content: flex-end;
 		gap: clamp(0.7rem, 2.2vw, 1.9rem);
@@ -1176,19 +1134,6 @@
 		}
 		.credits__block {
 			max-width: 34%;
-		}
-		.credits__team {
-			padding-right: 0;
-		}
-		.credits__names {
-			letter-spacing: 0.12em;
-			column-gap: 0.4rem;
-		}
-		.credits__names li {
-			gap: 0.4rem;
-		}
-		.vcols {
-			display: none;
 		}
 		.vcol--en {
 			display: none;
