@@ -80,7 +80,7 @@ components:
 
 **Creative North Star: "The Obi Band"**
 
-Design reference file: `.impeccable/design-reference/obi.html`
+Design reference file: `.impeccable/design-references/obi.html`
 
 A Tokyo boutique-pop sleeve for a single, eternal number. The page is printed, not screened: two inks — cream stock and obi red — on a fine-tooth uncoated ground, with exactly one color allowed to behave like something other than ink: the gold foil the count is set in. Everything else is flat, square-cornered, and hairline-ruled, as if it came off a press rather than out of a UI kit. It refuses the category default of a glowing counter centered on a dark ground with a pill button beneath it — here the ground is bare and light, the button is a single printed disc, and depth is earned by one real cast shadow rather than borrowed from gradients or glow.
 

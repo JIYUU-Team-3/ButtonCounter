@@ -2,17 +2,30 @@
 	import Counter from '$lib/components/Counter.svelte';
 </script>
 
+<div class="ground" aria-hidden="true"></div>
+<div class="stock" aria-hidden="true"></div>
+
 <main class="scroller">
 	<Counter />
 </main>
 
 <style>
+	.ground {
+		position: fixed;
+		inset: 0;
+		z-index: 0;
+		background: var(--cream);
+		pointer-events: none;
+	}
+
 	.scroller {
-		min-height: 100svh;
-		display: flex;
-		background: #f7f3eb;
-		color: #111;
-		padding: max(2rem, env(safe-area-inset-top)) max(2rem, env(safe-area-inset-right))
-			max(2rem, env(safe-area-inset-bottom)) max(2rem, env(safe-area-inset-left));
+		position: relative;
+		height: 100dvh;
+		overflow-y: auto;
+		overflow-x: hidden;
+		overscroll-behavior-y: contain;
+		scroll-snap-type: y mandatory;
+		scroll-behavior: smooth;
+		color: var(--ink);
 	}
 </style>
