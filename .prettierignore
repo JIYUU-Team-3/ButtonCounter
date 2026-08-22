@@ -14,3 +14,5 @@ README.md
 # Tool-managed directories, not project source
 .claude/
 .impeccable/
+# Vendored third-party bundle, minified upstream
+src/lib/vendor/
