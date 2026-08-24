@@ -1,0 +1,116 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import ObiBand from './ObiBand.svelte';
+
+	/* Right-to-left in the DOM is right-to-left on the cloth: .roster is
+	   row-reverse, and vertical Japanese columns read from the right, so the
+	   first person listed here is the first person read. */
+	const roster = [
+		{ jp: 'サティヤ', role: 'Project lead', handle: 'Jerry12sir' },
+		{ jp: 'ティシャ', role: 'Backend', handle: 'Uteytithya' },
+		{ jp: 'マーヌット', role: 'Design & front end', handle: 'Hout-Manut' },
+		{ jp: 'ポーチェン', role: 'Reviews & dev ops', handle: 'Porchhenng' },
+		{ jp: 'ヴィサル', role: 'Testing', handle: 'salxz696969' }
+	];
+
+	const REPO = 'JIYUU-Team-3/ButtonCounter';
+
+	/* The stack's barcode is print furniture, not data — but a random one
+	   re-prints differently on every render and on every Cloth repaint, which
+	   reads as a glitch rather than as ink. Derive it from the catalog number
+	   so the same sleeve always carries the same code. */
+	function bars(seed: string, count: number) {
+		let h = 0;
+		for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+		return Array.from({ length: count }, () => {
+			h = (h * 1664525 + 1013904223) >>> 0;
+			return { wide: ((h >>> 8) & 3) === 0, half: ((h >>> 16) & 7) === 0 };
+		});
+	}
+
+	const barcode = bars('BC-001 · 26 · 08 · 24', 46);
+
+	let section: HTMLElement;
+	let shown = $state(false);
+
+	onMount(() => {
+		/* Observe the section, not the roster: once Cloth takes over, the roster
+		   lives inside a <canvas layoutsubtree> and is never painted to the page,
+		   so an observer on it would never report an intersection and the columns
+		   would stay hidden on exactly the browsers that got the nicest band. */
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (!entry.isIntersecting) continue;
+					shown = true;
+					io.disconnect();
+				}
+			},
+			{ threshold: 0.15 }
+		);
+		io.observe(section);
+		return () => io.disconnect();
+	});
+</script>
+
+<section class="pane pane--credits" bind:this={section} aria-labelledby="credits-title">
+	<h2 class="sr" id="credits-title">The people who built it</h2>
+
+	<ObiBand>
+		<div class="credits">
+			<!-- The crest is the strip that shows under the face. It carries what
+			     the sleeve says about itself; the body below carries who made it. -->
+			<div class="crest">
+				<div class="credits__block">
+					<p class="credits__mark">Button<br />Counter</p>
+				</div>
+
+				<div class="vcols">
+					<span class="vcol vcol--wordmark" aria-hidden="true">ボタン・カウンター</span>
+					<span class="vcol vcol--thin" aria-hidden="true">一つの数字</span>
+					<span class="vcol vcol--thin vcol--en">ONE NUMBER</span>
+					<span class="vcol vcol--thin" aria-hidden="true">押すだけ</span>
+					<span class="vcol vcol--thin vcol--en">+1 ONLY</span>
+					<span class="vcol vcol--thin" aria-hidden="true">戻らない</span>
+					<span class="vcol vcol--thin vcol--en">NEVER DOWN</span>
+					<span class="vcol vcol--thin">BC-001</span>
+				</div>
+			</div>
+
+			<div class="body">
+				<ul class="roster" class:is-in={shown}>
+					{#each roster as person, i (person.handle)}
+						<li class="roster__item">
+							<a
+								class="hand"
+								href="https://github.com/{person.handle}"
+								style="--hang: {i * 60}ms"
+								rel="noreferrer"
+							>
+								<span class="hand__name" lang="ja">{person.jp}</span>
+								<span class="hand__role">{person.role}</span>
+								<span class="hand__at">@{person.handle}</span>
+							</a>
+						</li>
+					{/each}
+				</ul>
+
+				<div class="credits__stack">
+					<span class="chip">Team 3</span>
+					<div class="barcode" aria-hidden="true">
+						{#each barcode as bar, i (i)}
+							<i class:w={bar.wide} class:h={bar.half}></i>
+						{/each}
+					</div>
+				</div>
+			</div>
+		</div>
+	</ObiBand>
+
+	<div class="foot">
+		<div class="foot__group">
+			<span class="micro">First press 26 · 08 · 24</span>
+		</div>
+		<a class="link" href="https://github.com/{REPO}" rel="noreferrer">github.com/{REPO}</a>
+	</div>
+</section>
