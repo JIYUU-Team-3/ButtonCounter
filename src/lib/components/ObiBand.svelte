@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 
-	type Props = { children: Snippet };
+	/* `children` is printed ON the cloth and is rasterised with it. `overlay`
+	   is the layer of real objects tied OVER the cloth — it sits above the
+	   output canvas and is never rasterised, so a rigid thing hung on the band
+	   stays rigid instead of rippling with the drape. */
+	type Props = { children: Snippet; overlay?: Snippet };
 
-	const { children }: Props = $props();
+	const { children, overlay }: Props = $props();
 
 	let band: HTMLDivElement;
 	let src: HTMLCanvasElement;
@@ -24,6 +28,10 @@
 	function forwardClick(event: MouseEvent) {
 		if (!clothActive || event.defaultPrevented || event.button !== 0) return;
 		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+		/* The overlay's own anchors are live DOM above the output canvas — they
+		   were never rasterised, so they handle their own clicks. Forwarding
+		   here as well would fire the link twice. */
+		if ((event.target as Element | null)?.closest('.obi__over')) return;
 
 		const anchors = content.querySelectorAll<HTMLAnchorElement>('a[href]');
 		for (const anchor of anchors) {
@@ -162,4 +170,7 @@
 		{@render children()}
 	</div>
 	<canvas class="obi__out" bind:this={out} aria-hidden="true"></canvas>
+	{#if overlay}
+		<div class="obi__over">{@render overlay()}</div>
+	{/if}
 </div>

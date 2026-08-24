@@ -445,17 +445,6 @@
 		border-top: var(--rule) solid var(--obi);
 	}
 
-	.spine__meta {
-		font-size: 0.6rem;
-		letter-spacing: 0.19em;
-		text-transform: uppercase;
-		color: var(--ink);
-		display: flex;
-		flex-direction: column;
-		gap: 0.34rem;
-		font-weight: 500;
-	}
-
 	.face {
 		display: flex;
 		flex-direction: column;

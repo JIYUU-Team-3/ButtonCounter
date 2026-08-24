@@ -54,7 +54,8 @@
 	background: var(--obi);
 	color: var(--white);
 	isolation: isolate;
-	overflow: hidden;
+	overflow-x: clip;
+	overflow-y: visible;
 }
 
 .obi__weave {
@@ -170,6 +171,13 @@
 	width: 100%;
 	height: 100%;
 	z-index: 4;
+	pointer-events: none;
+}
+
+.obi__over {
+	position: absolute;
+	inset: 0;
+	z-index: 5;
 	pointer-events: none;
 }
 
@@ -336,111 +344,227 @@
 }
 
 /* ---------------------------------------------------------------
-   THE ROSTER — five people, printed down the band as credit columns
+   THE OBIJIME — the cord tied over the band, and what hangs on it
 
-   Same device as the band's own .vcols: vertical Japanese columns
-   hanging alternately from the head and the foot of the cloth. Each
-   column is one person and one link. In vertical-rl the inline axis
-   runs top to bottom, so `border-inline-start` is a short tick above
-   the name — a printed register mark, not a UI underline.
+   An obi's cord is the one part of a real obi this build was
+   missing, so the credits pane borrows it rather than inventing a
+   decoration: a braided cord slung the width of the band, knotted
+   a third of the way along, with five ema hung from it.
+
+   MATERIAL, not a fourth ink. The band is printed; the cord and the
+   plaques are physical objects tied over the print. That is why
+   hinoki is allowed here while the two-ink rule still holds for
+   every flat surface — a new *object* enters the world, not a new
+   colour on the press. Do not read this as licence to set type or
+   fill a panel in hinoki.
+
+   Hinoki sits deliberately ~36 L-points above foil gold (#8a6220,
+   itself a dark wood brown). A darker board would read as foil
+   leaking off the count, which is the one colour the system spends
+   in exactly one place.
    --------------------------------------------------------------- */
-.roster {
-	display: flex;
-	flex-direction: row-reverse;
-	align-items: flex-start;
-	justify-content: center;
-	gap: clamp(0.9rem, 2.6vw, 2.2rem);
-	flex: none;
-	margin: auto;
-	padding: 0;
-	list-style: none;
+:root {
+	--hinoki: #e3cfa8; /* pale unfinished cypress — the plaque face */
+	--hinoki-grain: #b99a68; /* the grain itself */
+	--hinoki-cut: #a98a5c; /* the sawn edge, darker than the face */
+	--hinoki-lit: #f0e2c6; /* the chamfer catching the band's light */
+	--cast: #6b0026; /* shade on obi red is a deeper red, never grey */
 }
 
-.roster__item {
-	display: flex;
+.cord {
+	position: absolute;
+	top: var(--peek);
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+	transform: translateY(var(--cord-shift, 0px));
 }
 
-.hand {
-	writing-mode: vertical-rl;
+.cord__svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+.cord__line {
+	fill: none;
+	stroke: var(--cream);
+	stroke-width: 3;
+	stroke-linecap: square;
+}
+
+.cord__cast {
+	fill: none;
+	stroke: var(--cast);
+	stroke-width: 5;
+	opacity: 0.26;
+	transform: translateY(2.5px);
+}
+
+.cord__loop {
+	stroke: var(--obi);
+	stroke-width: 2.5;
+	stroke-linecap: square;
+	/* the hang loop is red on pale wood, which is how ema actually hang, and
+	   it puts the band's own ink back onto the plaque */
+	filter: brightness(0.82);
+}
+
+.cord__wrap {
+	fill: var(--cream);
+}
+
+.cord__tail {
+	fill: none;
+	stroke: var(--cream);
+	stroke-width: 2.5;
+	stroke-linecap: square;
+}
+
+/* ---------- the plaque ---------- */
+
+.ema {
+	/* --ema-fit is set on .cord from the measured band. Width alone cannot size
+	   these: a landscape phone is wide and short, so the plaque has to answer to
+	   the height it is actually given. Scaling the box and its type by one ratio
+	   keeps the proportion — it shrinks, it does not become a different object. */
+	--ema-w: calc(clamp(3.6rem, 15.5vw, 6.2rem) * var(--ema-fit, 1));
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: var(--ema-w);
+	margin-left: calc(var(--ema-w) / -2);
+	/* the pierce hole at the apex is the pivot, so transform-origin is the top
+	   centre and translate() lands that point straight onto the cord */
+	transform-origin: 50% 0;
+	pointer-events: auto;
+	text-decoration: none;
+	color: var(--ink);
+	/* pan-y, not none: the swing is horizontal, so lateral drags come to us
+	   while a vertical swipe still scrolls the page it started on */
+	touch-action: pan-y;
+	cursor: grab;
+	will-change: transform;
+}
+
+.ema:active {
+	cursor: grabbing;
+}
+
+.ema__face,
+.ema__shade {
+	clip-path: polygon(50% 0, 100% 13%, 100% 100%, 0 100%, 0 13%);
+}
+
+.ema__edge {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	width: var(--ema-w);
+	height: 100%;
+	overflow: visible;
+	fill: none;
+	stroke: var(--hinoki-cut);
+	stroke-width: 0;
+	pointer-events: none;
+}
+
+.ema__face {
+	position: relative;
+	z-index: 1;
 	display: flex;
 	flex-direction: column;
-	gap: clamp(0.3rem, 0.8vw, 0.6rem);
-	color: var(--white);
-	text-decoration: none;
-	white-space: nowrap;
-	border-inline-start: var(--rule) solid color-mix(in srgb, var(--white) 38%, transparent);
-	padding-inline-start: clamp(0.4rem, 1vw, 0.75rem);
-	transition: border-color var(--duration-quick) var(--ease-smooth-out);
+	gap: clamp(0.25rem, 0.7vw, 0.5rem);
+	writing-mode: vertical-rl;
+	padding: calc(clamp(1.1rem, 3.4vw, 1.7rem) * var(--ema-fit, 1))
+		calc(clamp(0.34rem, 1.1vw, 0.6rem) * var(--ema-fit, 1))
+		calc(clamp(0.5rem, 1.6vw, 0.8rem) * var(--ema-fit, 1));
+	min-height: calc(clamp(8.6rem, 34vw, 14rem) * var(--ema-fit, 1));
+
+	background-color: var(--hinoki);
+	background-image:
+		/* the chamfer, catching the light the band lights everything else by */
+		linear-gradient(
+			154deg,
+			color-mix(in srgb, var(--hinoki-lit) 90%, transparent) 0 6%,
+			transparent 22%
+		),
+		var(--grain-tile);
+	background-position:
+		0 0,
+		var(--gx, 0) var(--gy, 0);
+	background-size:
+		auto,
+		190px 260px;
 }
 
-/* The names are this pane's display type. Anton cannot set Japanese, so
-   the credits face carries the register instead of borrowing it — the one
-   place Zen Kaku is asked to work above label scale. */
-.hand__name {
+:root {
+	--grain-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='260'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55 0.006' numOctaves='4' seed='7' stitchTiles='stitch' result='n'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02 0.014' numOctaves='2' seed='3' result='w'/%3E%3CfeDisplacementMap in='n' in2='w' scale='16' xChannelSelector='R' yChannelSelector='G'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='gamma' amplitude='0.55' exponent='1.7'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='190' height='260' filter='url(%23g)' opacity='0.5' style='mix-blend-mode:multiply'/%3E%3C/svg%3E");
+}
+
+.ema__shade {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	background: var(--cast);
+	opacity: 0.3;
+	filter: blur(7px);
+	will-change: transform;
+	pointer-events: none;
+}
+
+.ema:active .ema__shade {
+	opacity: 0.35;
+	filter: blur(9px);
+}
+
+.ema__name {
 	font-family: var(--jp);
-	font-size: clamp(1.5rem, 5vw, 4rem);
-	letter-spacing: 0.1em;
-	line-height: 1.3;
+	font-size: calc(clamp(0.95rem, 3.6vw, 1.5rem) * var(--ema-fit, 1));
+	letter-spacing: 0.06em;
+	line-height: 1.18;
 	font-weight: 500;
 }
 
-.hand__role {
-	font-size: clamp(0.55rem, 1vw, 0.68rem);
-	letter-spacing: 0.19em;
+.ema__role {
+	font-size: calc(clamp(0.44rem, 1.5vw, 0.56rem) * var(--ema-fit, 1));
+	letter-spacing: 0.17em;
 	text-transform: uppercase;
 	font-weight: 600;
-	line-height: 1.5;
+	line-height: 1.4;
 }
 
-.hand__at {
-	font-size: clamp(0.52rem, 0.95vw, 0.63rem);
-	letter-spacing: 0.15em;
+.ema__at {
+	font-size: calc(clamp(0.42rem, 1.4vw, 0.52rem) * var(--ema-fit, 1));
+	letter-spacing: 0.12em;
 	font-weight: 400;
-	line-height: 1.5;
+	line-height: 1.4;
 	text-decoration: underline;
-	text-decoration-color: color-mix(in srgb, var(--white) 30%, transparent);
+	text-decoration-color: color-mix(in srgb, var(--ink) 32%, transparent);
 	text-decoration-thickness: 1px;
-	text-underline-offset: 0.32em;
+	text-underline-offset: 0.3em;
 	transition: text-decoration-color var(--duration-quick) var(--ease-smooth-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
-	.hand:hover {
-		border-inline-start-color: var(--white);
-	}
-	.hand:hover .hand__at {
-		text-decoration-color: var(--white);
+	.ema:hover .ema__at {
+		text-decoration-color: var(--ink);
 	}
 }
 
-/* the disc's ring, in the band's ink instead of the sheet's */
-.hand:focus-visible {
-	outline: 2px solid var(--white);
-	outline-offset: 6px;
-}
-.hand:focus-visible .hand__at {
-	text-decoration-color: var(--white);
+.ema:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 5px;
 }
 
-/* the one authored moment on this pane: the columns drop into place as
-   the cloth settles, leftmost-printed first, the same left-to-right
-   cascade the count's digits use */
-.roster.is-in .hand {
-	animation: hang var(--duration-slow) var(--ease-smooth-out) both;
-	animation-delay: var(--hang, 0ms);
-}
-
-@keyframes hang {
-	0% {
-		transform: translateY(calc(var(--distance-medium) * -1));
-		opacity: 0;
-		filter: blur(var(--blur-small));
-	}
-	100% {
-		transform: translateY(0);
-		opacity: 1;
-		filter: blur(0);
-	}
+/* Reduced motion: the rig is solved once and drawn at rest, the loop never
+   starts, and the plaques are not draggable. No motion means no motion. */
+.cord.is-static .ema {
+	cursor: default;
+	touch-action: auto;
 }
 
 /* ---------------------------------------------------------------
@@ -522,16 +646,9 @@
 	.credits__block {
 		max-width: 34%;
 	}
-	.vcol--en {
-		display: none;
-	}
 	.pane {
 		min-height: 56svh;
 	}
-	/* .pane wins the min-height tie by source order alone (same specificity
-	   as .pane--face's own rule) — restate both here or the hero collapses
-	   to 56svh and the credits band peeks in under the edge band, reading
-	   as two footers stacked on first view. */
 	.pane--face {
 		min-height: calc(100svh - var(--peek));
 	}
@@ -544,53 +661,23 @@
 	.crest {
 		padding-block: 0.55rem;
 	}
-	/* the longest column is the product name, and the wordmark is already
-	   printed a thumb's width to its left — on a phone the peek is too
-	   shallow to set it without printing onto the fold */
-	.vcol--wordmark {
-		display: none;
-	}
 
-	/* The stack is desktop-only print furniture; the roster is the content.
-	   Turning the band's row into a column hands the five people the full
-	   width of the cloth instead of the ~54% left beside the wordmark —
-	   at 390px that is the difference between 42px and 71px per person. */
-	.credits__stack {
-		display: none;
-	}
 	.credits__mark {
 		font-size: clamp(1.2rem, 5.6vw, 1.7rem);
 	}
-	/* Five columns have to clear the narrowest phone: at 390px the gutter
-	   leaves ~364px, so a column may cost about 65px all in — name, role,
-	   handle, their gaps and the register tick. Anything larger pushes the
-	   first name (rightmost, and the one read first) off the cloth. */
-	.roster {
-		gap: clamp(0.25rem, 1.3vw, 0.6rem);
-		max-width: 100%;
+	/* Five plaques have to clear the narrowest phone: at 390px the gutter
+	   leaves ~364px, so a plaque and its share of the gaps may cost about
+	   72px. Anything wider pushes the first person hung (rightmost, and the
+	   one read first) past the edge of the band. */
+	.ema {
+		--ema-w: clamp(3.1rem, 15vw, 3.9rem);
 	}
-	/* On a phone the cloth is tall and narrow — the obi's own proportion —
-	   so each person becomes one continuous vertical line instead of three
-	   parallel ones: name, then role, then handle, running down the column.
-	   In vertical-rl `row` is the top-to-bottom axis, so this is the same
-	   flex box read the other way. It buys the width back for type. */
-	.hand {
-		flex-direction: row;
-		align-items: flex-start;
-		padding-inline-start: 0.34rem;
-		gap: clamp(0.5rem, 2vw, 0.9rem);
+	.ema__face {
+		min-height: clamp(7.6rem, 33vw, 9.4rem);
+		padding: clamp(0.95rem, 4vw, 1.2rem) 0.3rem 0.45rem;
 	}
-	.hand__name {
-		font-size: clamp(1.4rem, 10vw, 3.2rem);
-		letter-spacing: 0.06em;
-	}
-	.hand__role {
-		font-size: 0.53rem;
-		letter-spacing: 0.12em;
-	}
-	.hand__at {
-		font-size: 0.5rem;
-		letter-spacing: 0.1em;
+	.ema__name {
+		font-size: clamp(0.85rem, 3.9vw, 1.1rem);
 	}
 }
 
@@ -602,11 +689,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.roster.is-in .hand {
-		animation: none;
-	}
-	.hand,
-	.hand__at,
+	.ema__at,
 	.link {
 		transition: none;
 	}
