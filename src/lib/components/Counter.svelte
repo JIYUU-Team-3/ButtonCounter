@@ -299,11 +299,6 @@
 		pressed = false;
 	}
 
-	let band: HTMLDivElement;
-	let bandSrc: HTMLCanvasElement;
-	let bandContent: HTMLDivElement;
-	let bandOut: HTMLCanvasElement;
-
 	onMount(() => {
 		const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 		const onMotion = () => {
@@ -329,115 +324,11 @@
 		const countRo = new ResizeObserver(measureBlur);
 		countRo.observe(countEl);
 
-		let cloth: { resize(): void; destroy(): void } | null = null;
-		let ro: ResizeObserver | undefined;
-		let dprQuery: MediaQueryList | undefined;
-		let pending = 0;
-		let disposed = false;
-
-		const dpr = () => Math.min(window.devicePixelRatio || 1, 2);
-
-		function remeasure() {
-			const box = band.getBoundingClientRect();
-			if (box.width < 1 || box.height < 1) return;
-			const r = dpr();
-			bandContent.style.width = box.width + 'px';
-			bandContent.style.height = box.height + 'px';
-			bandSrc.width = Math.max(1, Math.round(box.width * r));
-			bandSrc.height = Math.max(1, Math.round(box.height * r));
-		}
-
-		function schedule() {
-			if (pending || disposed) return;
-			pending = requestAnimationFrame(() => {
-				pending = 0;
-				if (disposed) return;
-				remeasure();
-				cloth?.resize();
-			});
-		}
-
-		function watchDpr() {
-			if (disposed) return;
-			dprQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
-			dprQuery.addEventListener('change', onDpr, { once: true });
-		}
-		function onDpr() {
-			if (disposed) return;
-			schedule();
-			watchDpr();
-		}
-
-		function printFlat() {
-			bandSrc.hidden = true;
-			if (bandContent.parentNode === bandSrc) band.insertBefore(bandContent, bandOut);
-			bandContent.style.width = '';
-			bandContent.style.height = '';
-		}
-
-		async function startCloth() {
-			let mod;
-			try {
-				mod = await import('$lib/vendor/cloth-vanilla.js');
-			} catch {
-				return;
-			}
-			if (disposed || !mod.supportsHtmlInCanvas()) return;
-
-			try {
-				remeasure();
-				bandSrc.hidden = false;
-				bandSrc.appendChild(bandContent);
-				cloth = mod.createCloth(
-					{ source: bandSrc, content: bandContent, output: bandOut },
-					{
-						pin: 'left',
-						wind: reduced ? 0 : 0.4,
-						speed: 0.32,
-						amplitude: 24,
-						drape: 16,
-						damping: 1.7,
-						brush: reduced ? 0 : 1.5,
-						brushSize: 190,
-						light: 0.2,
-						sheen: 0.07,
-						shadow: 0.2,
-						cornerRadius: 0,
-						perspective: 1500,
-						backing: [0.894, 0.0, 0.31]
-					}
-				);
-			} catch {
-				cloth = null;
-			}
-
-			if (disposed) {
-				cloth?.destroy();
-				return;
-			}
-			if (!cloth) {
-				printFlat();
-				return;
-			}
-
-			ro = new ResizeObserver(schedule);
-
-			ro.observe(band);
-			watchDpr();
-		}
-
-		startCloth();
-
 		return () => {
-			disposed = true;
 			window.removeEventListener('keydown', onWindowKeyDown);
 			window.removeEventListener('keyup', onWindowKeyUp);
 			motionQuery.removeEventListener('change', onMotion);
 			countRo.disconnect();
-			if (pending) cancelAnimationFrame(pending);
-			ro?.disconnect();
-			dprQuery?.removeEventListener('change', onDpr);
-			cloth?.destroy();
 		};
 	});
 </script>
@@ -517,34 +408,6 @@
 			<span class="sr">{markSr}</span>
 		</button>
 	</div>
-
-	<div class="obi band--edge" bind:this={band}>
-		<canvas
-			class="obi__src"
-			bind:this={bandSrc}
-			hidden
-			aria-hidden="true"
-			{...{ layoutsubtree: 'true' }}
-		></canvas>
-		<div class="obi__content" bind:this={bandContent}>
-			<span class="obi__weave" aria-hidden="true"></span>
-			<div class="credits">
-				<div class="credits__block">
-					<p class="credits__mark">Button<br />Counter</p>
-				</div>
-
-				<div class="vcols">
-					<span class="vcol" aria-hidden="true">ボタン・カウンター</span>
-					<span class="vcol" lang="ja">サティヤ</span>
-					<span class="vcol" lang="ja">ティシャ</span>
-					<span class="vcol" lang="ja">マーヌット</span>
-					<span class="vcol" lang="ja">ポーチェン</span>
-					<span class="vcol" lang="ja">ヴィサル</span>
-				</div>
-			</div>
-		</div>
-		<canvas class="obi__out" bind:this={bandOut} aria-hidden="true"></canvas>
-	</div>
 </section>
 
 <style>
@@ -553,36 +416,6 @@
 		width: 0;
 		height: 0;
 		overflow: hidden;
-	}
-
-	.sr {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0 0 0 0);
-		white-space: nowrap;
-		border: 0;
-	}
-
-	.pane {
-		position: relative;
-		scroll-snap-align: start;
-		scroll-snap-stop: always;
-		min-height: 52svh;
-		padding-block: var(--gut);
-		padding-inline: max(var(--gut), var(--safe-l)) max(var(--gut), var(--safe-r));
-		display: flex;
-		flex-direction: column;
-	}
-
-	.pane--face {
-		min-height: 100dvh;
-		padding-top: max(var(--gut), var(--safe-t));
-		padding-bottom: 0;
-		justify-content: center;
 	}
 
 	.spine {
@@ -610,17 +443,6 @@
 	.spine__rule {
 		width: clamp(3rem, 6vw, 5.5rem);
 		border-top: var(--rule) solid var(--obi);
-	}
-
-	.spine__meta {
-		font-size: 0.6rem;
-		letter-spacing: 0.19em;
-		text-transform: uppercase;
-		color: var(--ink);
-		display: flex;
-		flex-direction: column;
-		gap: 0.34rem;
-		font-weight: 500;
 	}
 
 	.face {
@@ -887,225 +709,6 @@
 		color: var(--ink);
 	}
 
-	.obi {
-		position: relative;
-		background: var(--obi);
-		color: var(--white);
-		isolation: isolate;
-		overflow: hidden;
-	}
-
-	.obi__weave {
-		position: absolute;
-		inset: 0;
-		z-index: 0;
-		pointer-events: none;
-		background-color: var(--obi);
-		background-image:
-			linear-gradient(
-				180deg,
-				rgba(0, 0, 0, 0.22) 0 1.5px,
-				rgba(255, 255, 255, 0.09) 1.5px 3px,
-				rgba(0, 0, 0, 0.09) 3px 5px,
-				transparent 5px 12px
-			),
-			linear-gradient(
-				0deg,
-				rgba(0, 0, 0, 0.19) 0 1.5px,
-				rgba(255, 255, 255, 0.07) 1.5px 3px,
-				rgba(0, 0, 0, 0.08) 3px 5px,
-				transparent 5px 12px
-			);
-		background-repeat: no-repeat, no-repeat;
-		background-size:
-			100% 12px,
-			100% 12px;
-		background-position: top, bottom;
-		box-shadow:
-			inset 0 9px 15px -10px rgba(0, 0, 0, 0.34),
-			inset 0 -9px 15px -10px rgba(0, 0, 0, 0.28);
-	}
-
-	.obi__weave::before {
-		content: '';
-		position: absolute;
-		inset: 0;
-		mix-blend-mode: multiply;
-		opacity: 0.7;
-		background-image:
-			repeating-linear-gradient(
-				0deg,
-				rgba(0, 0, 0, 0.13) 0 1px,
-				rgba(0, 0, 0, 0.04) 1px 2.1px,
-				rgba(0, 0, 0, 0) 2.1px 4.2px
-			),
-			repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 1px, rgba(0, 0, 0, 0) 1px 3.1px),
-			repeating-linear-gradient(64deg, rgba(0, 0, 0, 0.05) 0 1px, rgba(0, 0, 0, 0) 1px 7px),
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='weft'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.85' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.6'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23weft)'/%3E%3C/svg%3E"),
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='warp'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8 0.016' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.34'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23warp)'/%3E%3C/svg%3E");
-		background-size:
-			auto,
-			auto,
-			auto,
-			340px 340px,
-			340px 340px;
-	}
-
-	.obi__weave::after {
-		content: '';
-		position: absolute;
-		inset: 0;
-		mix-blend-mode: screen;
-		opacity: 0.19;
-		background-image:
-			repeating-linear-gradient(
-				0deg,
-				rgba(255, 255, 255, 0) 0 2.2px,
-				rgba(255, 255, 255, 0.2) 2.2px 2.9px,
-				rgba(255, 255, 255, 0) 2.9px 4.2px
-			),
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='fuzz'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014 0.7' numOctaves='3' seed='19' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='gamma' amplitude='0.5' exponent='1.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23fuzz)'/%3E%3C/svg%3E"),
-			linear-gradient(
-				97deg,
-				transparent 0 16%,
-				rgba(255, 238, 200, 0.26) 36%,
-				rgba(255, 250, 232, 0.34) 46%,
-				rgba(255, 238, 200, 0.22) 57%,
-				transparent 78%
-			);
-		background-size:
-			auto,
-			340px 340px,
-			190% 100%;
-		background-position:
-			0 0,
-			0 0,
-			28% 0;
-		background-repeat: repeat, repeat, no-repeat;
-	}
-
-	.obi__content {
-		position: absolute;
-		inset: 0;
-		z-index: 3;
-		overflow: hidden;
-	}
-
-	.obi__src {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		z-index: 3;
-	}
-	.obi__src[hidden] {
-		display: none;
-	}
-
-	.obi__out {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		z-index: 4;
-		pointer-events: none;
-	}
-
-	.credits {
-		position: relative;
-		z-index: 1;
-		height: 100%;
-		display: flex;
-		justify-content: space-between;
-		align-items: stretch;
-		gap: clamp(0.9rem, 2.4vw, 2rem);
-		padding-block: clamp(0.9rem, 2.2vw, 1.7rem);
-		padding-inline: max(var(--gut), var(--safe-l)) max(var(--gut), var(--safe-r));
-		overflow: hidden;
-	}
-
-	.credits__block {
-		flex: 0 1 auto;
-		max-width: 38%;
-		padding-right: clamp(0.6rem, 2vw, 1.6rem);
-	}
-
-	.credits__mark {
-		font-family: var(--display);
-		font-size: clamp(2rem, 5vw, 4.2rem);
-		line-height: 0.78;
-		text-transform: uppercase;
-		color: var(--white);
-		transform: scaleX(0.86);
-		transform-origin: left top;
-		margin: 0;
-		flex: none;
-	}
-
-	.vcols {
-		display: flex;
-		flex-direction: row-reverse;
-		gap: clamp(0.55rem, 1.5vw, 1.15rem);
-		overflow: hidden;
-		flex: 1;
-		justify-content: space-between;
-		align-items: stretch;
-	}
-
-	.vcol {
-		writing-mode: vertical-rl;
-		font-family: var(--jp);
-		font-size: clamp(0.6rem, 1.15vw, 0.78rem);
-		letter-spacing: 0.14em;
-		line-height: 1.5;
-		color: var(--white);
-		white-space: nowrap;
-		font-weight: 500;
-	}
-
-	.vcol--thin {
-		font-weight: 400;
-		opacity: 0.92;
-	}
-	.vcol:nth-child(even) {
-		align-self: flex-end;
-	}
-	.vcol:nth-child(3n) {
-		align-self: center;
-	}
-
-	.band--edge {
-		margin-inline: calc(max(var(--gut), var(--safe-l)) * -1)
-			calc(max(var(--gut), var(--safe-r)) * -1);
-		height: clamp(6.2rem, 13svh, 9rem);
-		flex: none;
-	}
-
-	.band--edge .credits {
-		align-items: center;
-		padding-block: 0.7rem;
-		/* ...but the wordmark stays above the indicator. */
-		padding-bottom: calc(0.7rem + var(--safe-b));
-	}
-
-	.band--edge .credits__mark {
-		font-size: clamp(1.35rem, 2.9vw, 2.3rem);
-	}
-
-	.band--edge .vcol {
-		font-size: clamp(0.52rem, 0.95vw, 0.66rem);
-		letter-spacing: 0.11em;
-	}
-
-	.band--edge .vcols {
-		/* shrink to the columns themselves so .credits' space-between keeps
-		   them against the band's right edge */
-		flex: 0 1 auto;
-		justify-content: flex-end;
-		gap: clamp(0.7rem, 2.2vw, 1.9rem);
-		margin-bottom: calc(var(--safe-b) * -1);
-	}
-
 	@media (max-width: 46rem) {
 		.spine {
 			position: static;
@@ -1117,31 +720,6 @@
 		.face {
 			padding-block: clamp(1.5rem, 6vh, 3rem) 0;
 			gap: clamp(2.2rem, 7vh, 4rem);
-		}
-		.credits__block {
-			max-width: 34%;
-		}
-		.vcol--en {
-			display: none;
-		}
-		.pane {
-			min-height: 56svh;
-		}
-		.pane--face {
-			min-height: 100dvh;
-		}
-		.band--edge {
-			height: clamp(5.4rem, 12svh, 7rem);
-		}
-		.vcols {
-			gap: 0.5rem;
-		}
-	}
-
-	@media (max-width: 30rem) {
-		.credits {
-			padding-inline: max(calc(var(--gut) * 0.8), var(--safe-l))
-				max(calc(var(--gut) * 0.8), var(--safe-r));
 		}
 	}
 

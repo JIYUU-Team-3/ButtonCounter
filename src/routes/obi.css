@@ -1,0 +1,696 @@
+/* ---------------------------------------------------------------
+   THE PRINT SYSTEM — shared across every pane and every band.
+
+   These rules were scoped inside Counter.svelte while the face was
+   the only pane. The credits pane needs the same band, the same
+   credit columns and the same snap geometry, and Svelte scoping
+   does not reach a sibling component — so the shared half lives
+   here and each component keeps only what is its own.
+   --------------------------------------------------------------- */
+
+:root {
+	/* How much of the band's head shows under the face. The face is short by
+	   exactly this much, so the two add up to one viewport and the cloth
+	   peeking out is the same element the credits pane scrolls onto. */
+	--peek: clamp(6.2rem, 13svh, 9rem);
+}
+
+.sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.pane {
+	position: relative;
+	scroll-snap-align: start;
+	scroll-snap-stop: always;
+	min-height: 52svh;
+	padding-block: var(--gut);
+	padding-inline: max(var(--gut), var(--safe-l)) max(var(--gut), var(--safe-r));
+	display: flex;
+	flex-direction: column;
+}
+
+.pane--face {
+	/* svh, not lvh: this pane plus the peek must add up to what is actually on
+	   screen with the toolbar up, or the cloth shows short. svh is the visible
+	   height AND it holds still through the toolbar's collapse, so the snap
+	   target does not move mid-gesture the way a dvh-sized pane would. */
+	min-height: calc(100svh - var(--peek));
+	padding-top: max(var(--gut), var(--safe-t));
+	padding-bottom: 0;
+	justify-content: center;
+}
+
+.obi {
+	position: relative;
+	background: var(--obi);
+	color: var(--white);
+	isolation: isolate;
+	overflow-x: clip;
+	overflow-y: visible;
+}
+
+.obi__weave {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	background-color: var(--obi);
+	background-image:
+		linear-gradient(
+			180deg,
+			rgba(0, 0, 0, 0.22) 0 1.5px,
+			rgba(255, 255, 255, 0.09) 1.5px 3px,
+			rgba(0, 0, 0, 0.09) 3px 5px,
+			transparent 5px 12px
+		),
+		linear-gradient(
+			0deg,
+			rgba(0, 0, 0, 0.19) 0 1.5px,
+			rgba(255, 255, 255, 0.07) 1.5px 3px,
+			rgba(0, 0, 0, 0.08) 3px 5px,
+			transparent 5px 12px
+		);
+	background-repeat: no-repeat, no-repeat;
+	background-size:
+		100% 12px,
+		100% 12px;
+	background-position: top, bottom;
+	box-shadow:
+		inset 0 9px 15px -10px rgba(0, 0, 0, 0.34),
+		inset 0 -9px 15px -10px rgba(0, 0, 0, 0.28);
+}
+
+.obi__weave::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	mix-blend-mode: multiply;
+	opacity: 0.7;
+	background-image:
+		repeating-linear-gradient(
+			0deg,
+			rgba(0, 0, 0, 0.13) 0 1px,
+			rgba(0, 0, 0, 0.04) 1px 2.1px,
+			rgba(0, 0, 0, 0) 2.1px 4.2px
+		),
+		repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.06) 0 1px, rgba(0, 0, 0, 0) 1px 3.1px),
+		repeating-linear-gradient(64deg, rgba(0, 0, 0, 0.05) 0 1px, rgba(0, 0, 0, 0) 1px 7px),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='weft'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.85' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.6'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23weft)'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='warp'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8 0.016' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.34'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23warp)'/%3E%3C/svg%3E");
+	background-size:
+		auto,
+		auto,
+		auto,
+		340px 340px,
+		340px 340px;
+}
+
+.obi__weave::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	mix-blend-mode: screen;
+	opacity: 0.19;
+	background-image:
+		repeating-linear-gradient(
+			0deg,
+			rgba(255, 255, 255, 0) 0 2.2px,
+			rgba(255, 255, 255, 0.2) 2.2px 2.9px,
+			rgba(255, 255, 255, 0) 2.9px 4.2px
+		),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='340'%3E%3Cfilter id='fuzz'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014 0.7' numOctaves='3' seed='19' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='gamma' amplitude='0.5' exponent='1.5'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='340' height='340' filter='url(%23fuzz)'/%3E%3C/svg%3E"),
+		linear-gradient(
+			97deg,
+			transparent 0 16%,
+			rgba(255, 238, 200, 0.26) 36%,
+			rgba(255, 250, 232, 0.34) 46%,
+			rgba(255, 238, 200, 0.22) 57%,
+			transparent 78%
+		);
+	background-size:
+		auto,
+		340px 340px,
+		190% 100%;
+	background-position:
+		0 0,
+		0 0,
+		28% 0;
+	background-repeat: repeat, repeat, no-repeat;
+}
+
+.obi__content {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	overflow: hidden;
+}
+
+.obi__src {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 3;
+}
+.obi__src[hidden] {
+	display: none;
+}
+
+.obi__out {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 4;
+	pointer-events: none;
+}
+
+.obi__over {
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+	pointer-events: none;
+}
+
+/* The band is one printed strip read top to bottom: the crest is the part
+   that shows under the face, the body is what the credits pane scrolls onto. */
+.credits {
+	position: relative;
+	z-index: 1;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	padding-inline: max(var(--gut), var(--safe-l)) max(var(--gut), var(--safe-r));
+	overflow: hidden;
+}
+
+.crest {
+	flex: none;
+	height: var(--peek);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: clamp(0.9rem, 2.4vw, 2rem);
+	/* the crest is exactly the peek tall, so its padding has to come out of
+	   that height — without it the credit columns print onto the fold */
+	padding-block: 0.7rem;
+}
+
+.body {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: clamp(0.9rem, 2.4vw, 2rem);
+	padding-block: clamp(1.2rem, 3vw, 2.4rem);
+	overflow: hidden;
+}
+
+.credits__block {
+	flex: 0 1 auto;
+	max-width: 38%;
+	padding-right: clamp(0.6rem, 2vw, 1.6rem);
+}
+
+.credits__mark {
+	font-family: var(--display);
+	font-size: clamp(1.35rem, 2.9vw, 2.3rem);
+	line-height: 0.78;
+	text-transform: uppercase;
+	color: var(--white);
+	transform: scaleX(0.86);
+	transform-origin: left top;
+	margin: 0;
+	flex: none;
+}
+
+.vcols {
+	display: flex;
+	flex-direction: row-reverse;
+	gap: clamp(0.7rem, 2.2vw, 1.9rem);
+	overflow: hidden;
+	flex: 0 1 auto;
+	justify-content: flex-end;
+	align-items: stretch;
+}
+
+.vcol {
+	writing-mode: vertical-rl;
+	font-family: var(--jp);
+	font-size: clamp(0.52rem, 0.95vw, 0.66rem);
+	letter-spacing: 0.11em;
+	line-height: 1.5;
+	color: var(--white);
+	white-space: nowrap;
+	font-weight: 500;
+}
+
+.vcol--thin {
+	font-weight: 400;
+	opacity: 0.92;
+}
+.vcol:nth-child(even) {
+	align-self: flex-end;
+}
+.vcol:nth-child(3n) {
+	align-self: center;
+}
+
+/* One band, bled edge to edge. Its head is pulled up out of the pane by the
+   peek, so the strip showing under the face and the strip the credits pane
+   scrolls onto are the same cloth rather than two that happen to match. */
+.band--one {
+	margin-inline: calc(max(var(--gut), var(--safe-l)) * -1) calc(max(var(--gut), var(--safe-r)) * -1);
+	flex: 1;
+}
+
+.credits__sub {
+	font-size: 0.55rem;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	font-weight: 600;
+	margin: 0.75rem 0 0;
+	line-height: 1.6;
+	color: var(--white);
+}
+
+/* ---------- the catalog stack, printed down the band's right edge ---------- */
+.credits__stack {
+	display: flex;
+	flex-direction: column;
+	/* the catalog prints at the foot of the cloth, under the shortest name */
+	justify-content: flex-end;
+	align-items: flex-end;
+	text-align: right;
+	align-self: stretch;
+	flex: none;
+	gap: clamp(0.5rem, 1.3vw, 0.85rem);
+}
+
+.catalog {
+	font-family: var(--display);
+	font-size: clamp(1.15rem, 2.6vw, 2rem);
+	letter-spacing: 0.02em;
+	line-height: 1;
+	transform: scaleX(0.9);
+	transform-origin: right top;
+}
+
+.chip {
+	display: inline-block;
+	border: var(--rule) solid var(--white);
+	padding: 0.16rem 0.42rem;
+	font-size: 0.55rem;
+	letter-spacing: 0.18em;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.micro {
+	font-size: 0.55rem;
+	letter-spacing: 0.17em;
+	text-transform: uppercase;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+}
+
+.barcode {
+	display: flex;
+	align-items: flex-end;
+	gap: 1px;
+	height: 2.2rem;
+}
+
+.barcode i {
+	display: block;
+	width: 1px;
+	height: 100%;
+	background: var(--white);
+}
+.barcode i.w {
+	width: 2px;
+}
+.barcode i.h {
+	height: 78%;
+}
+
+/* ---------------------------------------------------------------
+   THE OBIJIME — the cord tied over the band, and what hangs on it
+
+   An obi's cord is the one part of a real obi this build was
+   missing, so the credits pane borrows it rather than inventing a
+   decoration: a braided cord slung the width of the band, knotted
+   a third of the way along, with five ema hung from it.
+
+   MATERIAL, not a fourth ink. The band is printed; the cord and the
+   plaques are physical objects tied over the print. That is why
+   hinoki is allowed here while the two-ink rule still holds for
+   every flat surface — a new *object* enters the world, not a new
+   colour on the press. Do not read this as licence to set type or
+   fill a panel in hinoki.
+
+   Hinoki sits deliberately ~36 L-points above foil gold (#8a6220,
+   itself a dark wood brown). A darker board would read as foil
+   leaking off the count, which is the one colour the system spends
+   in exactly one place.
+   --------------------------------------------------------------- */
+:root {
+	--hinoki: #e3cfa8; /* pale unfinished cypress — the plaque face */
+	--hinoki-grain: #b99a68; /* the grain itself */
+	--hinoki-cut: #a98a5c; /* the sawn edge, darker than the face */
+	--hinoki-lit: #f0e2c6; /* the chamfer catching the band's light */
+	--cast: #6b0026; /* shade on obi red is a deeper red, never grey */
+}
+
+.cord {
+	position: absolute;
+	top: var(--peek);
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+	transform: translateY(var(--cord-shift, 0px));
+}
+
+.cord__svg {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+}
+
+.cord__line {
+	fill: none;
+	stroke: var(--cream);
+	stroke-width: 3;
+	stroke-linecap: square;
+}
+
+.cord__cast {
+	fill: none;
+	stroke: var(--cast);
+	stroke-width: 5;
+	opacity: 0.26;
+	transform: translateY(2.5px);
+}
+
+.cord__loop {
+	stroke: var(--obi);
+	stroke-width: 2.5;
+	stroke-linecap: square;
+	/* the hang loop is red on pale wood, which is how ema actually hang, and
+	   it puts the band's own ink back onto the plaque */
+	filter: brightness(0.82);
+}
+
+.cord__wrap {
+	fill: var(--cream);
+}
+
+.cord__tail {
+	fill: none;
+	stroke: var(--cream);
+	stroke-width: 2.5;
+	stroke-linecap: square;
+}
+
+/* ---------- the plaque ---------- */
+
+.ema {
+	/* --ema-fit is set on .cord from the measured band. Width alone cannot size
+	   these: a landscape phone is wide and short, so the plaque has to answer to
+	   the height it is actually given. Scaling the box and its type by one ratio
+	   keeps the proportion — it shrinks, it does not become a different object. */
+	--ema-w: calc(clamp(3.6rem, 15.5vw, 6.2rem) * var(--ema-fit, 1));
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: var(--ema-w);
+	margin-left: calc(var(--ema-w) / -2);
+	/* the pierce hole at the apex is the pivot, so transform-origin is the top
+	   centre and translate() lands that point straight onto the cord */
+	transform-origin: 50% 0;
+	pointer-events: auto;
+	text-decoration: none;
+	color: var(--ink);
+	/* pan-y, not none: the swing is horizontal, so lateral drags come to us
+	   while a vertical swipe still scrolls the page it started on */
+	touch-action: pan-y;
+	cursor: grab;
+	will-change: transform;
+}
+
+.ema:active {
+	cursor: grabbing;
+}
+
+.ema__face,
+.ema__shade {
+	clip-path: polygon(50% 0, 100% 13%, 100% 100%, 0 100%, 0 13%);
+}
+
+.ema__edge {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	width: var(--ema-w);
+	height: 100%;
+	overflow: visible;
+	fill: none;
+	stroke: var(--hinoki-cut);
+	stroke-width: 0;
+	pointer-events: none;
+}
+
+.ema__face {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	gap: clamp(0.25rem, 0.7vw, 0.5rem);
+	writing-mode: vertical-rl;
+	padding: calc(clamp(1.1rem, 3.4vw, 1.7rem) * var(--ema-fit, 1))
+		calc(clamp(0.34rem, 1.1vw, 0.6rem) * var(--ema-fit, 1))
+		calc(clamp(0.5rem, 1.6vw, 0.8rem) * var(--ema-fit, 1));
+	min-height: calc(clamp(8.6rem, 34vw, 14rem) * var(--ema-fit, 1));
+
+	background-color: var(--hinoki);
+	background-image:
+		/* the chamfer, catching the light the band lights everything else by */
+		linear-gradient(
+			154deg,
+			color-mix(in srgb, var(--hinoki-lit) 90%, transparent) 0 6%,
+			transparent 22%
+		),
+		var(--grain-tile);
+	background-position:
+		0 0,
+		var(--gx, 0) var(--gy, 0);
+	background-size:
+		auto,
+		190px 260px;
+}
+
+:root {
+	--grain-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='190' height='260'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55 0.006' numOctaves='4' seed='7' stitchTiles='stitch' result='n'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02 0.014' numOctaves='2' seed='3' result='w'/%3E%3CfeDisplacementMap in='n' in2='w' scale='16' xChannelSelector='R' yChannelSelector='G'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='gamma' amplitude='0.55' exponent='1.7'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='190' height='260' filter='url(%23g)' opacity='0.5' style='mix-blend-mode:multiply'/%3E%3C/svg%3E");
+}
+
+.ema__shade {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	background: var(--cast);
+	opacity: 0.3;
+	filter: blur(7px);
+	will-change: transform;
+	pointer-events: none;
+}
+
+.ema:active .ema__shade {
+	opacity: 0.35;
+	filter: blur(9px);
+}
+
+.ema__name {
+	font-family: var(--jp);
+	font-size: calc(clamp(0.95rem, 3.6vw, 1.5rem) * var(--ema-fit, 1));
+	letter-spacing: 0.06em;
+	line-height: 1.18;
+	font-weight: 500;
+}
+
+.ema__role {
+	font-size: calc(clamp(0.44rem, 1.5vw, 0.56rem) * var(--ema-fit, 1));
+	letter-spacing: 0.17em;
+	text-transform: uppercase;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.ema__at {
+	font-size: calc(clamp(0.42rem, 1.4vw, 0.52rem) * var(--ema-fit, 1));
+	letter-spacing: 0.12em;
+	font-weight: 400;
+	line-height: 1.4;
+	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--ink) 32%, transparent);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.3em;
+	transition: text-decoration-color var(--duration-quick) var(--ease-smooth-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.ema:hover .ema__at {
+		text-decoration-color: var(--ink);
+	}
+}
+
+.ema:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 5px;
+}
+
+/* Reduced motion: the rig is solved once and drawn at rest, the loop never
+   starts, and the plaques are not draggable. No motion means no motion. */
+.cord.is-static .ema {
+	cursor: default;
+	touch-action: auto;
+}
+
+/* ---------------------------------------------------------------
+   THE FOOT — bare stock under the cloth, where the addresses live
+   --------------------------------------------------------------- */
+.pane--credits {
+	min-height: 100lvh;
+	padding-block: 0;
+	justify-content: flex-end;
+	/* the band's head already showed under the face; snapping here puts the
+	   crest back at the top of the viewport instead of scrolling past it */
+	scroll-snap-align: start;
+}
+
+.foot {
+	flex: none;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0.6rem clamp(1rem, 3vw, 2.5rem);
+	padding-block: clamp(0.85rem, 2vw, 1.35rem);
+	padding-bottom: calc(clamp(0.85rem, 2vw, 1.35rem) + var(--safe-b));
+	color: var(--ink);
+	border-top: var(--rule) solid var(--gray);
+	margin-top: clamp(0.85rem, 2vw, 1.35rem);
+}
+
+.foot__group {
+	display: flex;
+	align-items: baseline;
+	gap: clamp(0.7rem, 2vw, 1.6rem);
+	flex-wrap: wrap;
+}
+
+/* the label voice, in ink on the sheet instead of white on the cloth */
+.foot .micro {
+	color: var(--ink);
+}
+
+/* the sheet's link: ink type, dead-ink rule, obi red on approach. The
+   system's signal colour is the only thing that moves. */
+.link {
+	color: var(--ink);
+	font-size: 0.55rem;
+	letter-spacing: 0.17em;
+	text-transform: uppercase;
+	font-weight: 600;
+	text-decoration: underline;
+	text-decoration-color: var(--gray);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.3em;
+	transition:
+		color var(--duration-quick) var(--ease-smooth-out),
+		text-decoration-color var(--duration-quick) var(--ease-smooth-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.link:hover {
+		color: var(--obi);
+		text-decoration-color: var(--obi);
+	}
+}
+
+.link:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 6px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 46rem) {
+	:root {
+		--peek: clamp(5.4rem, 12svh, 7rem);
+	}
+
+	.credits__block {
+		max-width: 34%;
+	}
+	.pane {
+		min-height: 56svh;
+	}
+	.pane--face {
+		min-height: calc(100svh - var(--peek));
+	}
+	.pane--credits {
+		min-height: 100lvh;
+	}
+	.vcols {
+		gap: 0.5rem;
+	}
+	.crest {
+		padding-block: 0.55rem;
+	}
+
+	.credits__mark {
+		font-size: clamp(1.2rem, 5.6vw, 1.7rem);
+	}
+	/* Five plaques have to clear the narrowest phone: at 390px the gutter
+	   leaves ~364px, so a plaque and its share of the gaps may cost about
+	   72px. Anything wider pushes the first person hung (rightmost, and the
+	   one read first) past the edge of the band. */
+	.ema {
+		--ema-w: clamp(3.1rem, 15vw, 3.9rem);
+	}
+	.ema__face {
+		min-height: clamp(7.6rem, 33vw, 9.4rem);
+		padding: clamp(0.95rem, 4vw, 1.2rem) 0.3rem 0.45rem;
+	}
+	.ema__name {
+		font-size: clamp(0.85rem, 3.9vw, 1.1rem);
+	}
+}
+
+@media (max-width: 30rem) {
+	.credits {
+		padding-inline: max(calc(var(--gut) * 0.8), var(--safe-l))
+			max(calc(var(--gut) * 0.8), var(--safe-r));
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ema__at,
+	.link {
+		transition: none;
+	}
+}
