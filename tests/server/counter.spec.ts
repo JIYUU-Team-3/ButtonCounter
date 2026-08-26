@@ -1,18 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-/* A stand-in for the drizzle handle, shaped exactly like the three chains
-   counter.ts builds and no wider. It counts the round trips it is asked for,
-   because "does this hit the database twice" is most of what the caching in
-   counter.ts is for. */
+// 単体テスト
 const fake = vi.hoisted(() => {
 	const rows = new Map<number, number>();
 	const calls = { select: 0, insert: 0, update: 0 };
 
-	/* set to fail the next N updates, standing in for a row that is not there
-	   yet (or was deleted underneath us) */
 	let missingUpdates = 0;
 
-	/* a read that has been sent but has not come back yet */
 	let gate: Promise<void> | null = null;
 	let open: (() => void) | null = null;
 
@@ -22,8 +16,6 @@ const fake = vi.hoisted(() => {
 			return {
 				from: () => ({
 					where: async () => {
-						/* the rows AS THE QUERY SAW THEM — a held read must come back
-						   with the value it read, not with whatever landed meanwhile */
 						const seen = rows.has(1) ? [{ count: rows.get(1)! }] : [];
 						if (gate) await gate;
 						return seen;
@@ -65,7 +57,6 @@ const fake = vi.hoisted(() => {
 		missNextUpdates(n: number) {
 			missingUpdates = n;
 		},
-		/** Hold every read in flight until the returned release is called. */
 		holdReads() {
 			gate = new Promise<void>((resolve) => (open = resolve));
 			return () => {
@@ -86,17 +77,13 @@ const fake = vi.hoisted(() => {
 
 vi.mock('$lib/server/db', () => ({ db: fake.db }));
 
-/* counter.ts caches the count and holds its listeners in module scope, so
-   every test gets a fresh copy of the module rather than a shared one. */
 async function freshCounter() {
 	vi.resetModules();
 	return import('$lib/server/counter');
 }
 
-/** Resolves once the microtask queue has drained a few times over. */
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-/** True if `promise` is still pending after a real tick. */
 async function pending(promise: Promise<unknown>): Promise<boolean> {
 	const marker = Symbol('pending');
 	const raced = await Promise.race([
@@ -240,11 +227,7 @@ describe('watchCount', () => {
 	});
 });
 
-/* ---------------------------------------------------------------
-   Regressions: the caching and listener bookkeeping, which is where
-   this module can go wrong quietly — an extra query per subscriber,
-   or a listener left behind by every disconnect.
-   --------------------------------------------------------------- */
+// 回帰テスト
 describe('regression', () => {
 	it('loads the count once, however many callers ask for it', async () => {
 		fake.rows.set(1, 12);

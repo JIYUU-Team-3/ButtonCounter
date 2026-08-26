@@ -20,9 +20,6 @@ import {
 	type Rig
 } from '$lib/obi/cord';
 
-/* The rig the component actually builds: five plaques on a phone-width band.
-   Tests that need a settled cord use this so they exercise the same shape the
-   page does rather than a two-node toy. */
 const XS = [40, 110, 180, 250, 320];
 const WIDTH = 390;
 const STEP = 64;
@@ -260,7 +257,7 @@ describe('step', () => {
 		for (let i = 0; i < 1000; i++) step(rig, 0, 0.42, 0.985, 4);
 
 		expect(energy(rig)).toBeLessThan(kicked);
-		/* under the component's own sleep threshold, so the rAF loop can stop */
+		
 		expect(energy(rig)).toBeLessThan(0.015);
 	});
 });

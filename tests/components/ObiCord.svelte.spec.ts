@@ -9,7 +9,6 @@ const roster = [
 	{ jp: 'マーヌット', role: 'Design & front end', handle: 'Hout-Manut' }
 ];
 
-/** The plaques as the DOM holds them — reading order is DOM order. */
 function plaques() {
 	return document.querySelectorAll<HTMLAnchorElement>('a.ema');
 }
@@ -51,11 +50,7 @@ describe('ObiCord.svelte', () => {
 	});
 });
 
-/* ---------------------------------------------------------------
-   Regressions. The plaques are a physics toy, and the failures that
-   matter are the ones where the toy eats something the page owes the
-   reader: reachability, and stable ink.
-   --------------------------------------------------------------- */
+// 回帰テスト（Regression)
 describe('regression', () => {
 	it('renders the plaques before any simulation runs, so they are never blank', () => {
 		render(ObiCord, { roster });
