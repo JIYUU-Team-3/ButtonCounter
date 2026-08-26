@@ -39,6 +39,17 @@ To apply the schema to Turso:
 npm run generate
 ```
 
+## End-to-end tests
+
+Run the Playwright suite (headless Chromium; add `--headed` to watch it):
+
+```sh
+npm run test:e2e
+```
+
+For interactive debugging, use `npm run test:e2e:ui`. Both commands create an isolated
+temporary libSQL database and never use the Turso credentials from `.env`.
+
 ## Multi-device sync verification
 
 This is the acceptance procedure for issue #13 — it proves that all devices converge on
