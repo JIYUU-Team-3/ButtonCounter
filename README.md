@@ -41,7 +41,7 @@ npm run generate
 
 ## End-to-end tests
 
-Run the Playwright suite locally in a visible Chromium window:
+Run the Playwright suite (headless Chromium; add `--headed` to watch it):
 
 ```sh
 npm run test:e2e
