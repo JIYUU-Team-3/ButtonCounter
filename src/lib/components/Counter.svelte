@@ -355,7 +355,7 @@
 
 	<div class="face">
 		<div>
-			<div class="count" bind:this={countEl} aria-hidden="true">
+			<div class="count" bind:this={countEl} data-testid="count-value" aria-hidden="true">
 				{#if count.error || cells.length === 0}
 					<span class="digit"><span class="digit__v">—</span></span>
 				{:else}
