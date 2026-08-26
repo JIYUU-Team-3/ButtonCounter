@@ -1,336 +1,336 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { getCount, increment } from '../../routes/counter/counter.remote.ts';
+	import { onMount } from 'svelte'
+	import { getCount, increment } from '../../routes/counter/counter.remote.ts'
 
-	const count = getCount();
+	const count = getCount()
 
-	let unconfirmed = $state(0);
-	let lastSeen: number | undefined;
+	let unconfirmed = $state(0)
+	let lastSeen: number | undefined
 
-	const displayed = $derived(count.ready ? count.current + unconfirmed : null);
+	const displayed = $derived(count.ready ? count.current + unconfirmed : null)
 
 	$effect(() => {
-		if (!count.ready) return;
-		const current = count.current;
+		if (!count.ready) return
+		const current = count.current
 		if (lastSeen !== undefined && current > lastSeen) {
-			unconfirmed = Math.max(0, unconfirmed - (current - lastSeen));
+			unconfirmed = Math.max(0, unconfirmed - (current - lastSeen))
 		}
-		lastSeen = current;
-	});
+		lastSeen = current
+	})
 
 	$effect(() => {
-		if (!count.ready) return;
-		writeLastCount(count.current);
-	});
+		if (!count.ready) return
+		writeLastCount(count.current)
+	})
 
-	let showDisconnected = $state(false);
+	let showDisconnected = $state(false)
 
 	$effect(() => {
 		if (count.error || count.connected) {
-			showDisconnected = false;
-			return;
+			showDisconnected = false
+			return
 		}
 		const timer = setTimeout(() => {
-			showDisconnected = true;
-		}, 800);
-		return () => clearTimeout(timer);
-	});
+			showDisconnected = true
+		}, 800)
+		return () => clearTimeout(timer)
+	})
 
-	type Cell = { kind: 'digit' | 'sep'; ch: string; nonce: number; rank: number };
+	type Cell = { kind: 'digit' | 'sep'; ch: string; nonce: number; rank: number }
 
-	let cells = $state<Cell[]>([]);
+	let cells = $state<Cell[]>([])
 
-	let countEl: HTMLDivElement;
-	let blurPeak = $state(6);
-	const BLUR_RATIO = 0.125;
-	const BLUR_ANISO = 2.9;
-	const BLUR_STOPS = [1, 0.62, 0.38, 0.22, 0.12, 0.062, 0.028, 0.01];
-	let rendered = $state(0);
-	let announced = $state('');
-	let rollSeq = 0;
+	let countEl: HTMLDivElement
+	let blurPeak = $state(6)
+	const BLUR_RATIO = 0.125
+	const BLUR_ANISO = 2.9
+	const BLUR_STOPS = [1, 0.62, 0.38, 0.22, 0.12, 0.062, 0.028, 0.01]
+	let rendered = $state(0)
+	let announced = $state('')
+	let rollSeq = 0
 
 	function groups(n: number) {
-		return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+		return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 	}
 
 	function paint(value: number, animate: boolean) {
-		const s = groups(value);
-		const lengthChanged = cells.length !== s.length;
-		const next: Cell[] = [];
-		let rank = 0;
+		const s = groups(value)
+		const lengthChanged = cells.length !== s.length
+		const next: Cell[] = []
+		let rank = 0
 
 		for (let i = 0; i < s.length; i++) {
-			const ch = s[i];
+			const ch = s[i]
 			if (ch === ',') {
-				next.push({ kind: 'sep', ch, nonce: 0, rank: 0 });
-				continue;
+				next.push({ kind: 'sep', ch, nonce: 0, rank: 0 })
+				continue
 			}
-			const prev = lengthChanged ? undefined : cells[i];
-			const changed = !prev || prev.ch !== ch;
-			const roll = animate && !reduced && changed;
+			const prev = lengthChanged ? undefined : cells[i]
+			const changed = !prev || prev.ch !== ch
+			const roll = animate && !reduced && changed
 			next.push({
 				kind: 'digit',
 				ch,
 				nonce: roll ? ++rollSeq : (prev?.nonce ?? 0),
-				rank: roll ? rank++ : 0
-			});
+				rank: roll ? rank++ : 0,
+			})
 		}
-		cells = next;
+		cells = next
 	}
 
-	let reduced = false;
-	let started = false;
-	let target = 0;
-	let from = 0;
-	let startedAt = 0;
-	let raf = 0;
-	let catchupMs = 500;
-	let ease = (t: number) => 1 - Math.pow(1 - t, 3);
-	let announceTimer: ReturnType<typeof setTimeout> | undefined;
+	let reduced = false
+	let started = false
+	let target = 0
+	let from = 0
+	let startedAt = 0
+	let raf = 0
+	let catchupMs = 500
+	let ease = (t: number) => 1 - Math.pow(1 - t, 3)
+	let announceTimer: ReturnType<typeof setTimeout> | undefined
 
-	const CACHE_KEY = 'bc:lastCount';
+	const CACHE_KEY = 'bc:lastCount'
 
 	function readLastCount(): number | null {
 		try {
-			const raw = localStorage.getItem(CACHE_KEY);
-			if (raw === null) return null;
-			const n = Number(raw);
-			return Number.isFinite(n) && n >= 0 ? n : null;
+			const raw = localStorage.getItem(CACHE_KEY)
+			if (raw === null) return null
+			const n = Number(raw)
+			return Number.isFinite(n) && n >= 0 ? n : null
 		} catch {
-			return null;
+			return null
 		}
 	}
 
 	function writeLastCount(n: number) {
 		try {
-			localStorage.setItem(CACHE_KEY, String(n));
+			localStorage.setItem(CACHE_KEY, String(n))
 		} catch {}
 	}
 
-	const cached = readLastCount();
+	const cached = readLastCount()
 	if (cached !== null) {
-		started = true;
-		rendered = cached;
-		target = cached;
-		paint(cached, false);
-		announced = `${groups(cached)} presses`;
+		started = true
+		rendered = cached
+		target = cached
+		paint(cached, false)
+		announced = `${groups(cached)} presses`
 	}
 
 	function bezier(x1: number, y1: number, x2: number, y2: number) {
-		const cx = 3 * x1;
-		const bx = 3 * (x2 - x1) - cx;
-		const ax = 1 - cx - bx;
-		const cy = 3 * y1;
-		const by = 3 * (y2 - y1) - cy;
-		const ay = 1 - cy - by;
-		const sampleX = (t: number) => ((ax * t + bx) * t + cx) * t;
-		const slopeX = (t: number) => (3 * ax * t + 2 * bx) * t + cx;
+		const cx = 3 * x1
+		const bx = 3 * (x2 - x1) - cx
+		const ax = 1 - cx - bx
+		const cy = 3 * y1
+		const by = 3 * (y2 - y1) - cy
+		const ay = 1 - cy - by
+		const sampleX = (t: number) => ((ax * t + bx) * t + cx) * t
+		const slopeX = (t: number) => (3 * ax * t + 2 * bx) * t + cx
 
 		return (x: number) => {
-			let t = x;
+			let t = x
 			for (let i = 0; i < 6; i++) {
-				const d = slopeX(t);
-				if (Math.abs(d) < 1e-6) break;
-				const err = sampleX(t) - x;
-				if (Math.abs(err) < 1e-6) break;
-				t -= err / d;
+				const d = slopeX(t)
+				if (Math.abs(d) < 1e-6) break
+				const err = sampleX(t) - x
+				if (Math.abs(err) < 1e-6) break
+				t -= err / d
 			}
-			t = Math.min(1, Math.max(0, t));
-			return ((ay * t + by) * t + cy) * t;
-		};
+			t = Math.min(1, Math.max(0, t))
+			return ((ay * t + by) * t + cy) * t
+		}
 	}
 
 	function readMotionTokens() {
-		const s = getComputedStyle(document.documentElement);
-		const dur = parseFloat(s.getPropertyValue('--duration-very-slow'));
-		if (Number.isFinite(dur) && dur > 0) catchupMs = dur;
+		const s = getComputedStyle(document.documentElement)
+		const dur = parseFloat(s.getPropertyValue('--duration-very-slow'))
+		if (Number.isFinite(dur) && dur > 0) catchupMs = dur
 
-		const raw = s.getPropertyValue('--ease-smooth-out').trim();
-		const m = raw.match(/cubic-bezier\(([^)]+)\)/);
+		const raw = s.getPropertyValue('--ease-smooth-out').trim()
+		const m = raw.match(/cubic-bezier\(([^)]+)\)/)
 		if (m) {
-			const p = m[1].split(',').map((v) => parseFloat(v));
-			if (p.length === 4 && p.every(Number.isFinite)) ease = bezier(p[0], p[1], p[2], p[3]);
+			const p = m[1].split(',').map((v) => parseFloat(v))
+			if (p.length === 4 && p.every(Number.isFinite)) ease = bezier(p[0], p[1], p[2], p[3])
 		}
 	}
 
 	function stopTween() {
-		if (raf) cancelAnimationFrame(raf);
-		raf = 0;
+		if (raf) cancelAnimationFrame(raf)
+		raf = 0
 	}
 
 	function land(value: number, cascade: boolean) {
-		rendered = value;
-		paint(value, cascade);
-		announce(value);
+		rendered = value
+		paint(value, cascade)
+		announce(value)
 	}
 
 	function step(now: number) {
-		const t = Math.min(1, (now - startedAt) / catchupMs);
+		const t = Math.min(1, (now - startedAt) / catchupMs)
 		if (t >= 1) {
-			raf = 0;
-			land(target, true);
-			return;
+			raf = 0
+			land(target, true)
+			return
 		}
-		const v = Math.round(from + (target - from) * ease(t));
+		const v = Math.round(from + (target - from) * ease(t))
 		if (v !== rendered) {
-			rendered = v;
-			paint(v, false);
+			rendered = v
+			paint(v, false)
 		}
-		raf = requestAnimationFrame(step);
+		raf = requestAnimationFrame(step)
 	}
 
 	function seek(to: number) {
-		const delta = to - rendered;
-		target = to;
+		const delta = to - rendered
+		target = to
 
 		if (!started) {
-			started = true;
-			stopTween();
-			rendered = to;
-			paint(to, false);
-			announced = `${groups(to)} presses`;
-			return;
+			started = true
+			stopTween()
+			rendered = to
+			paint(to, false)
+			announced = `${groups(to)} presses`
+			return
 		}
 		if (reduced || delta <= 0 || delta === 1) {
-			stopTween();
-			land(to, delta === 1);
-			return;
+			stopTween()
+			land(to, delta === 1)
+			return
 		}
-		from = rendered;
-		startedAt = performance.now();
-		if (!raf) raf = requestAnimationFrame(step);
+		from = rendered
+		startedAt = performance.now()
+		if (!raf) raf = requestAnimationFrame(step)
 	}
 
-	const OTHERS_THROTTLE_MS = 8000;
-	let lastOthersAnnounce = 0;
+	const OTHERS_THROTTLE_MS = 8000
+	let lastOthersAnnounce = 0
 
 	function announce(value: number, mine = false) {
 		if (!mine) {
-			const now = performance.now();
-			if (now - lastOthersAnnounce < OTHERS_THROTTLE_MS) return;
-			lastOthersAnnounce = now;
+			const now = performance.now()
+			if (now - lastOthersAnnounce < OTHERS_THROTTLE_MS) return
+			lastOthersAnnounce = now
 		}
-		clearTimeout(announceTimer);
+		clearTimeout(announceTimer)
 		announceTimer = setTimeout(() => {
-			announced = `${groups(value)} presses`;
-		}, 400);
+			announced = `${groups(value)} presses`
+		}, 400)
 	}
 
 	$effect(() => {
-		const to = displayed;
-		if (to === null || to === target) return;
-		seek(to);
-	});
+		const to = displayed
+		if (to === null || to === target) return
+		seek(to)
+	})
 
 	$effect(() => () => {
-		stopTween();
-		clearTimeout(announceTimer);
-		clearTimeout(shakeTimer);
-		if (shakeRaf) cancelAnimationFrame(shakeRaf);
-	});
+		stopTween()
+		clearTimeout(announceTimer)
+		clearTimeout(shakeTimer)
+		if (shakeRaf) cancelAnimationFrame(shakeRaf)
+	})
 
-	let pressed = $state(false);
-	let errored = $state(false);
-	let shaking = $state(false);
-	let markSr = $state('Add one to the count');
-	let shakeTimer: ReturnType<typeof setTimeout> | undefined;
-	let shakeRaf = 0;
+	let pressed = $state(false)
+	let errored = $state(false)
+	let shaking = $state(false)
+	let markSr = $state('Add one to the count')
+	let shakeTimer: ReturnType<typeof setTimeout> | undefined
+	let shakeRaf = 0
 
 	async function bump() {
-		if (raf) from += 1;
-		target += 1;
-		rendered += 1;
-		paint(rendered, true);
-		announce(rendered, true);
+		if (raf) from += 1
+		target += 1
+		rendered += 1
+		paint(rendered, true)
+		announce(rendered, true)
 
-		navigator.vibrate?.(10);
-		unconfirmed++;
+		navigator.vibrate?.(10)
+		unconfirmed++
 
 		try {
-			await increment();
+			await increment()
 		} catch {
-			unconfirmed = Math.max(0, unconfirmed - 1);
-			fail();
+			unconfirmed = Math.max(0, unconfirmed - 1)
+			fail()
 		}
 	}
 
 	function fail() {
-		errored = true;
-		markSr = "Your last press didn't land — press again";
-		shaking = false;
-		clearTimeout(shakeTimer);
+		errored = true
+		markSr = "Your last press didn't land — press again"
+		shaking = false
+		clearTimeout(shakeTimer)
 		shakeRaf = requestAnimationFrame(() => {
-			shakeRaf = 0;
-			shaking = true;
+			shakeRaf = 0
+			shaking = true
 			shakeTimer = setTimeout(() => {
-				shaking = false;
-				errored = false;
-				markSr = 'Add one to the count';
-			}, 420);
-		});
+				shaking = false
+				errored = false
+				markSr = 'Add one to the count'
+			}, 420)
+		})
 	}
 
 	function isTypingTarget(target: EventTarget | null) {
-		if (!(target instanceof HTMLElement)) return false;
-		if (target.isContentEditable) return true;
-		return ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+		if (!(target instanceof HTMLElement)) return false
+		if (target.isContentEditable) return true
+		return ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
 	}
 
 	function onWindowKeyDown(event: KeyboardEvent) {
-		if (event.key !== 'Enter' && event.key !== ' ') return;
-		if (isTypingTarget(event.target)) return;
-		if (!count.ready) return;
-		event.preventDefault();
-		pressed = true;
-		if (event.repeat) return;
-		bump();
+		if (event.key !== 'Enter' && event.key !== ' ') return
+		if (isTypingTarget(event.target)) return
+		if (!count.ready) return
+		event.preventDefault()
+		pressed = true
+		if (event.repeat) return
+		bump()
 	}
 
 	function onWindowKeyUp(event: KeyboardEvent) {
-		if (event.key !== 'Enter' && event.key !== ' ') return;
-		pressed = false;
+		if (event.key !== 'Enter' && event.key !== ' ') return
+		pressed = false
 	}
 
 	function onPointerDown() {
-		pressed = true;
-		bump();
+		pressed = true
+		bump()
 	}
 	function onPointerUp() {
-		pressed = false;
+		pressed = false
 	}
 
 	onMount(() => {
-		const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+		const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
 		const onMotion = () => {
-			reduced = motionQuery.matches;
+			reduced = motionQuery.matches
 			if (reduced) {
-				stopTween();
-				rendered = target;
-				paint(target, false);
+				stopTween()
+				rendered = target
+				paint(target, false)
 			}
-		};
-		motionQuery.addEventListener('change', onMotion);
-		reduced = motionQuery.matches;
-		readMotionTokens();
+		}
+		motionQuery.addEventListener('change', onMotion)
+		reduced = motionQuery.matches
+		readMotionTokens()
 
-		window.addEventListener('keydown', onWindowKeyDown);
-		window.addEventListener('keyup', onWindowKeyUp);
+		window.addEventListener('keydown', onWindowKeyDown)
+		window.addEventListener('keyup', onWindowKeyUp)
 
 		const measureBlur = () => {
-			const fs = parseFloat(getComputedStyle(countEl).fontSize);
-			if (Number.isFinite(fs) && fs > 0) blurPeak = fs * BLUR_RATIO;
-		};
-		measureBlur();
-		const countRo = new ResizeObserver(measureBlur);
-		countRo.observe(countEl);
+			const fs = parseFloat(getComputedStyle(countEl).fontSize)
+			if (Number.isFinite(fs) && fs > 0) blurPeak = fs * BLUR_RATIO
+		}
+		measureBlur()
+		const countRo = new ResizeObserver(measureBlur)
+		countRo.observe(countEl)
 
 		return () => {
-			window.removeEventListener('keydown', onWindowKeyDown);
-			window.removeEventListener('keyup', onWindowKeyUp);
-			motionQuery.removeEventListener('change', onMotion);
-			countRo.disconnect();
-		};
-	});
+			window.removeEventListener('keydown', onWindowKeyDown)
+			window.removeEventListener('keyup', onWindowKeyUp)
+			motionQuery.removeEventListener('change', onMotion)
+			countRo.disconnect()
+		}
+	})
 </script>
 
 <svg class="filters" aria-hidden="true" focusable="false">
@@ -339,7 +339,7 @@
 			<filter id="roll-blur-{i}" x="-80%" y="-160%" width="260%" height="420%">
 				<feGaussianBlur
 					stdDeviation="{((blurPeak * frac) / BLUR_ANISO).toFixed(3)} {(blurPeak * frac).toFixed(
-						3
+						3,
 					)}"
 				/>
 			</filter>

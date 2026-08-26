@@ -1,5 +1,5 @@
-import type { Handle } from '@sveltejs/kit';
-import { dev } from '$app/environment';
+import type { Handle } from '@sveltejs/kit'
+import { dev } from '$app/environment'
 // import { getTextDirection } from '$lib/paraglide/runtime';
 // import { paraglideMiddleware } from '$lib/paraglide/server';
 
@@ -18,8 +18,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 			httpOnly: true,
 			sameSite: 'lax',
 			secure: !dev,
-			maxAge: 60 * 60 * 24 * 365
-		});
+			maxAge: 60 * 60 * 24 * 365,
+		})
 	}
-	return resolve(event);
-};
+	return resolve(event)
+}
