@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { getCount, increment } from './counter.remote.ts';
+	import { getCount, increment } from './counter.remote.ts'
 
-	const count = getCount();
+	const count = getCount()
 
-	let pending = $state(0);
+	let pending = $state(0)
 
 	async function bump() {
-		pending++;
+		pending++
 		try {
-			await increment();
+			await increment()
 		} finally {
-			pending--;
+			pending--
 		}
 	}
 </script>

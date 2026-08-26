@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ObiBand from './ObiBand.svelte';
-	import ObiCord from './ObiCord.svelte';
+	import ObiBand from './ObiBand.svelte'
+	import ObiCord from './ObiCord.svelte'
 
 	/* Right-to-left in the DOM is right-to-left on the cloth: .roster is
 	   row-reverse, and vertical Japanese columns read from the right, so the
@@ -10,25 +10,25 @@
 		{ jp: 'ティシャ', role: 'Backend', handle: 'Uteytithya' },
 		{ jp: 'マーヌット', role: 'Design & front end', handle: 'Hout-Manut' },
 		{ jp: 'ポーチェン', role: 'Reviews & dev ops', handle: 'Porchhenng' },
-		{ jp: 'ヴィサル', role: 'Testing', handle: 'salxz696969' }
-	];
+		{ jp: 'ヴィサル', role: 'Testing', handle: 'salxz696969' },
+	]
 
-	const REPO = 'JIYUU-Team-3/ButtonCounter';
+	const REPO = 'JIYUU-Team-3/ButtonCounter'
 
 	/* The stack's barcode is print furniture, not data — but a random one
 	   re-prints differently on every render and on every Cloth repaint, which
 	   reads as a glitch rather than as ink. Derive it from the catalog number
 	   so the same sleeve always carries the same code. */
 	function bars(seed: string, count: number) {
-		let h = 0;
-		for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+		let h = 0
+		for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0
 		return Array.from({ length: count }, () => {
-			h = (h * 1664525 + 1013904223) >>> 0;
-			return { wide: ((h >>> 8) & 3) === 0, half: ((h >>> 16) & 7) === 0 };
-		});
+			h = (h * 1664525 + 1013904223) >>> 0
+			return { wide: ((h >>> 8) & 3) === 0, half: ((h >>> 16) & 7) === 0 }
+		})
 	}
 
-	const barcode = bars('BC-001 · 26 · 08 · 24', 46);
+	const barcode = bars('BC-001 · 26 · 08 · 24', 46)
 </script>
 
 <section class="pane pane--credits" aria-labelledby="credits-title">
