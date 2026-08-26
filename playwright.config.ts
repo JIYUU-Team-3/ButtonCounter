@@ -18,6 +18,12 @@ export default defineConfig({
 	use: {
 		...devices['Desktop Chrome'],
 		baseURL: 'http://127.0.0.1:4174',
+		/* Headful, always. Watching the counter tick is half the point of this
+		   suite, and `npm run test:e2e` is the command people actually type — so
+		   the window is not conditional on anything. A CI runner with no display
+		   would need `xvfb-run` (or its own headless override); nothing runs this
+		   suite on CI today. */
+		headless: false,
 		screenshot: 'only-on-failure',
 		trace: 'retain-on-failure',
 	},
