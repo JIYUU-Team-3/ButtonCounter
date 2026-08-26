@@ -30,3 +30,6 @@ project.inlang/cache/
 
 # Migrations
 migrations-folder
+
+test-results/
+playwright-report/
