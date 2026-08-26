@@ -1,34 +1,37 @@
-import { randomUUID } from 'node:crypto'
-import { join } from 'node:path'
-import { tmpdir } from 'node:os'
 import { defineConfig, devices } from '@playwright/test'
+import { databasePath } from './e2e/database.ts'
 
-const databasePath = join(tmpdir(), `button-counter-e2e-${randomUUID()}.db`)
-
-process.env.BUTTON_COUNTER_E2E_DB_PATH = databasePath
+const database = databasePath()
 
 export default defineConfig({
 	testDir: './e2e',
+	/* One shared counter behind every test, so they run one at a time. */
 	fullyParallel: false,
 	workers: 1,
-	retries: 0,
-	globalTeardown: './e2e/global-teardown.ts',
-	reporter: [['list'], ['html', { open: 'never' }]],
+	/* The reconnect test waits on a real socket coming back; give CI a second
+	   go at it rather than failing a branch on network timing. */
+	retries: process.env.CI ? 2 : 0,
+	globalSetup: './e2e/global-setup.ts',
+	/* Cleanup lives in a reporter, not in globalTeardown — see the note in
+	   e2e/cleanup-reporter.ts for why globalTeardown is too early. */
+	reporter: [['list'], ['html', { open: 'never' }], ['./e2e/cleanup-reporter.ts']],
 	use: {
 		...devices['Desktop Chrome'],
 		baseURL: 'http://127.0.0.1:4174',
-		headless: false,
 		screenshot: 'only-on-failure',
 		trace: 'retain-on-failure',
 	},
 	projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
 	webServer: {
-		command: 'npx tsx e2e/prepare-database.ts && npm run dev -- --host 127.0.0.1 --port 4174',
+		/* vite directly, not `npm run dev`: one less process in the tree for
+		   Playwright to kill, which is one less thing holding the database open
+		   after the run. */
+		command: `npx tsx e2e/prepare-database.ts && npx vite dev --host 127.0.0.1 --port 4174`,
 		url: 'http://127.0.0.1:4174',
 		reuseExistingServer: false,
 		timeout: 120_000,
 		env: {
-			TURSO_DATABASE_URL: `file:${databasePath}`,
+			TURSO_DATABASE_URL: `file:${database}`,
 			TURSO_AUTH_TOKEN: '',
 		},
 	},
