@@ -52,9 +52,9 @@ function subscribe(listener: Listener): () => void {
 }
 
 export async function* watchCount(signal: AbortSignal): AsyncGenerator<number> {
-	let wake: (() => void) | null = null;
-	let latest = 0;
-	let seeded = false;
+	let wake: (() => void) | null = null
+	let latest = 0
+	let seeded = false
 
 	/* Subscribed BEFORE the opening read, not after the opening yield.
 	   Subscribing later leaves a window — the read's own await, and the gap
@@ -64,25 +64,25 @@ export async function* watchCount(signal: AbortSignal): AsyncGenerator<number> {
 	   a busy counter that is invisible; on a quiet one a press appears to do
 	   nothing. */
 	const unsubscribe = subscribe((value) => {
-		latest = value;
-		seeded = true;
-		wake?.();
-	});
+		latest = value
+		seeded = true
+		wake?.()
+	})
 
 	const onAbort = () => wake?.()
 	signal.addEventListener('abort', onAbort, { once: true })
 
 	try {
-		const initial = await readCount();
+		const initial = await readCount()
 		/* checked after the await, never before: a value that arrived while the
 		   read was in flight is newer than the read's own result */
 		if (!seeded) {
-			latest = initial;
-			seeded = true;
+			latest = initial
+			seeded = true
 		}
 
-		let sent = latest;
-		yield sent;
+		let sent = latest
+		yield sent
 
 		while (!signal.aborted) {
 			if (latest === sent) {
