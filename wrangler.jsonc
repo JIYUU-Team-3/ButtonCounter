@@ -2,13 +2,22 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "buttoncounter",
   "compatibility_date": "2026-08-31",
+  "compatibility_flags": ["nodejs_compat"],
   "main": ".svelte-kit/cloudflare/_worker.js",
   "assets": {
     "binding": "ASSETS",
-    "directory": ".svelte-kit/cloudflare"
+    "directory": ".svelte-kit/cloudflare",
+    "run_worker_first": true
   },
   "workers_dev": true,
   "preview_urls": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bc-jiyuu-db",
+      "database_id": "d623dfc9-a5ef-43a3-bc8e-b2ac6593b698"
+    }
+  ],
   "observability": {
     "enabled": true
   }

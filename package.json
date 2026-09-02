@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "vite dev",
-    "build": "wrangler types && vite build && npm run prepack",
+    "build": "vite build && npm run prepack",
     "preview": "npm run build && wrangler dev",
     "prepare": "svelte-kit sync || echo ''",
     "prepack": "svelte-kit sync && svelte-package && publint",
@@ -16,7 +16,7 @@
     "generate": "drizzle-kit generate --config drizzle.config.ts",
     "migrate": "drizzle-kit migrate --config drizzle.config.ts",
     "gen": "wrangler types",
-    "deploy": "npm run build && wrangler deploy",
+    "deploy": "npm run build && wrangler deploy --keep-vars",
     "cf-typegen": "wrangler types"
   },
   "files": [
@@ -25,8 +25,11 @@
     "!dist/**/*.spec.*"
   ],
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    ".svelte-kit/**",
+    "dist/**"
   ],
+
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",

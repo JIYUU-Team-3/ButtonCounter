@@ -1,22 +1,15 @@
 import { env } from '$env/dynamic/private'
-import { drizzle } from 'drizzle-orm/libsql'
+import { drizzle } from 'drizzle-orm/d1'
 
 type Database = ReturnType<typeof drizzle>
 
-let instance: Database | null = null
-
-function connect(): Database {
-	if (!env.TURSO_DATABASE_URL) {
-		throw new Error('TURSO_DATABASE_URL is not set')
-	}
-	return drizzle({
-		connection: {
-			url: env.TURSO_DATABASE_URL,
-			authToken: env.TURSO_AUTH_TOKEN,
-		},
-	})
-}
-/** Connects on first use, not on import. */
 export const db = new Proxy({} as Database, {
-	get: (_, prop) => Reflect.get((instance ??= connect()), prop, instance),
+	get: (_, prop) => {
+		const d1 = (env as Record<string, any>).DB || (process.env as Record<string, any>).DB
+		if (!d1) {
+			throw new Error('D1 database binding "DB" is not available')
+		}
+		const instance = drizzle(d1)
+		return Reflect.get(instance, prop, instance)
+	},
 })

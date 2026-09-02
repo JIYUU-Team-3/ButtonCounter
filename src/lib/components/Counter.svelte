@@ -218,8 +218,10 @@
 
 	$effect(() => {
 		const to = displayed
-		if (to === null || to === target) return
-		seek(to)
+		if (to === null) return
+		if (!started || to !== target) {
+			seek(to)
+		}
 	})
 
 	$effect(() => () => {
