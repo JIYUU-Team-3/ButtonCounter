@@ -121,6 +121,8 @@ html {
 	scroll-snap-type: y mandatory;
 	scroll-behavior: smooth;
 	overscroll-behavior-y: contain;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
 
 	/* The sheet, grain included, painted on the canvas — the one surface that
 	   covers the whole screen. The strips behind iOS's chrome fall outside the
@@ -136,6 +138,10 @@ html {
 	background-color: var(--cream);
 	background-image: var(--sheet-tile);
 	background-size: 220px 220px;
+}
+
+html::-webkit-scrollbar {
+	display: none;
 }
 
 body {
