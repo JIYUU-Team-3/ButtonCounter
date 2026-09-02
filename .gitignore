@@ -32,10 +32,7 @@ project.inlang/cache/
 # Migrations
 migrations-folder
 
-<<<<<<< Updated upstream
 test-results/
 playwright-report/
-=======
 .dev.vars*
 !.dev.vars.example
->>>>>>> Stashed changes

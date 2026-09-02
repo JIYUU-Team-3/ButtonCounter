@@ -1,14 +1,3 @@
-<<<<<<< Updated upstream
-import { paraglideVitePlugin } from '@inlang/paraglide-js'
-import tailwindcss from '@tailwindcss/vite'
-import { defineConfig } from 'vitest/config'
-import { playwright } from '@vitest/browser-playwright'
-import adapter from '@sveltejs/adapter-node'
-import { sveltekit } from '@sveltejs/kit/vite'
-import uws from 'svelte-adapter-uws/vite'
-import realtime from 'svelte-realtime/vite'
-/** @type {import('@sveltejs/kit').Config} */
-=======
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
@@ -17,7 +6,6 @@ import adapter from '@sveltejs/adapter-cloudflare';
 import { sveltekit } from '@sveltejs/kit/vite';
 import uws from 'svelte-adapter-uws/vite';
 import realtime from 'svelte-realtime/vite';
->>>>>>> Stashed changes
 
 /** @type {import('@sveltejs/kit').Config} */
 export default defineConfig({
