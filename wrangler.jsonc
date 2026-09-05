@@ -11,13 +11,13 @@
   },
   "workers_dev": true,
   "preview_urls": true,
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "bc-jiyuu-db",
-      "database_id": "d623dfc9-a5ef-43a3-bc8e-b2ac6593b698"
-    }
-  ],
+//  "d1_databases": [
+//    {
+//      "binding": "DB",
+//      "database_name": "bc-jiyuu-db",
+//      "database_id": "d623dfc9-a5ef-43a3-bc8e-b2ac6593b698"
+//    }
+//  ],
   "observability": {
     "enabled": true
   }
